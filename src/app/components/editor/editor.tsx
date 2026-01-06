@@ -1,6 +1,5 @@
 import React from 'react';
 import { Tracks } from './tracks';
-import { TrackInfo } from './trackinfo';
 import { AudioTrackList } from './audiotracklist';
 import { Seekbar, TimeSectionSelection } from './seekbar';
 import { useDispatch, useSelector } from 'react-redux';
@@ -444,7 +443,7 @@ export function Editor() {
     }
   }
 
-  function unsetDragMode(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+  function unsetDragMode(event: React.MouseEvent<HTMLDivElement>) {
     switch (movableType) {
       case MovableType.ScheduledTrack: {
         unsetDrag(event);
@@ -1049,7 +1048,10 @@ export function Editor() {
                         className="track-info bg-darker box-border border border-solid border-darker-2 rounded-l-md text-center content-center items-center min-w-44 max-w-44"
                         style={{height: height + 'px'}}
                       >
-                        <TrackInfo id={index} />
+                        <c-track-info
+                          track={index}
+                          entityCount={trackDetails[index].length}
+                        />
                       </div>
                     ))
                   }

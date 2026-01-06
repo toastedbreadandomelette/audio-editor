@@ -133,7 +133,9 @@ export function WindowManager() {
               horizontalAlignment={window.horizontalAlignment}
               verticalAlignment={window.verticalAlignment}
               overflow={window.overflow}
-              onPositionChange={(top: number, left: number) => setPosition(top, left, window.windowSymbol)}
+              onPositionChange={(top: number, left: number) => (
+                setPosition(top, left, window.windowSymbol)
+              )}
               zLevel={index}
               header={typeof window.header === 'string' ? <>{window.header}</> : window.header}
               onClose={() => close(window.windowSymbol)}

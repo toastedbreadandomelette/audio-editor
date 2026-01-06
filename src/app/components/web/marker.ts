@@ -104,7 +104,8 @@ export class MarkerElement extends HTMLElement {
     }
     this.maybeSelect.setAttribute('x', this.sStart.toString());
     this.maybeSelect.setAttribute('y', '0');
-    this.maybeSelect.setAttribute('width', Math.abs(this.sEnd - this.sStart).toString());
+    this.maybeSelect.setAttribute(
+      'width', Math.abs(this.sEnd - this.sStart).toString());
     this.maybeSelect.setAttribute('height', this.h.toString());
     this.maybeSelect.setAttribute('fill', 'rgba(250, 100, 100, 0.3)');
 
@@ -205,6 +206,7 @@ export class MarkerElement extends HTMLElement {
 
     this.pattern.setAttribute('width', this.d.toString());
     this.pattern.setAttribute('height', this.h.toString());
+
     this.pattern.children[0].setAttribute('d', `M0 0 L0 ${this.h}`);
     this.pattern.children[1].setAttribute('d', `M${this.d / 4} 0 L${this.d / 4} ${this.h}`);
     this.pattern.children[2].setAttribute('d', `M${this.d / 2} 0 L${this.d / 2} ${this.h}`);
@@ -223,7 +225,7 @@ export class MarkerElement extends HTMLElement {
   }
 
   attributeChangedCallback(name: string, oldValue: any, newValue: any) {
-    // console.log(name, oldValue, newValue);
+    console.log(name, oldValue, newValue);
   }
 }
 

@@ -89,7 +89,9 @@ export function ResizingGroup(props: React.PropsWithChildren<ResizableGroupProps
   )
 }
 
-export function ResizingWindowPanel(props: React.PropsWithChildren<ResizablePanelProps>) {
+export function ResizingWindowPanel(
+  props: React.PropsWithChildren<ResizablePanelProps>
+) {
   return (
     <div
       className={css('resizing-panel', props.className ?? '')}

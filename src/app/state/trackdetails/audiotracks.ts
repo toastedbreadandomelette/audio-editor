@@ -1,6 +1,6 @@
-import { SlicerSelection } from '@/app/components/editor/slicer';
-import { AudioTrackDetails, SEC_TO_MICROSEC } from './trackdetails';
-import { audioManager } from '@/app/services/audio/audiotrackmanager';
+import {SlicerSelection} from '@/app/components/editor/slicer';
+import {AudioTrackDetails, SEC_TO_MICROSEC} from './trackdetails';
+import {audioManager} from '@/app/services/audio/audiotrackmanager';
 
 export function addNewAudioToTrack(
   trackDetails: AudioTrackDetails[][],
@@ -9,7 +9,7 @@ export function addNewAudioToTrack(
     track: AudioTrackDetails
   }
 ): AudioTrackDetails[][] {
-  const { track, trackNumber } = action;
+  const {track, trackNumber} = action;
   trackDetails[trackNumber].push(track);
   // Probably sort array based on the appearance of each scheduled track?
   // This enable a domino-effect, making user's life easier to pull
@@ -102,8 +102,7 @@ export function cloneMultipleAudioTracks(
       ...track,
       trackDetail: {
         ...track.trackDetail,
-        // New cloned data: so new scheduled data.
-        scheduledKey: Symbol(),
+        scheduledKey: Symbol(),  // New cloned data: so new scheduled data.
         id: -1,
       }
     };

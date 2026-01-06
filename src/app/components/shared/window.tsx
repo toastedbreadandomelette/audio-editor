@@ -1,8 +1,8 @@
 import React from "react";
-import { css } from "@/app/services/utils";
-import { Exit } from "@/assets/exit";
-import { FaWindowMinimize } from "react-icons/fa";
-import { HorizontalAlignment, VerticalAlignment } from '../../state/windowstore';
+import {css} from "@/app/services/utils";
+import {Exit} from "@/assets/exit";
+import {FaWindowMinimize} from "react-icons/fa";
+import {HorizontalAlignment, VerticalAlignment} from '../../state/windowstore';
 
 /**
  * @description Window manipulation mode.

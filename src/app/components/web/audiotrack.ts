@@ -158,11 +158,8 @@ export class AudioTrackElement extends HTMLElement {
     const heightPerChannel = height / buffer.numberOfChannels;
   
     // Assuming that total channels are two.
-    for (
-      let channel = 0, vertical = 0; 
-      channel < buffer.numberOfChannels; 
-      ++channel, vertical += heightPerChannel
-    ) {
+    let channel = 0, vertical = 0; 
+    for (; channel < buffer.numberOfChannels; ++channel, vertical += heightPerChannel) {
       const channelData = buffer.getChannelData(channel);
       context.moveTo(0, (1 / 2.0) * heightPerChannel + vertical)
   
@@ -199,8 +196,11 @@ export class AudioTrackElement extends HTMLElement {
     const endOffsetMicros = this._trackSource.trackDetail.endOffsetInMicros;
     const timeUnitMicros = this._unitTime * SEC_TO_MICROSEC;
 
-    const leftScrollAmount = (startOffsetMicros / timeUnitMicros) * this._lineDistance;
-    const endPointOfWidth = (endOffsetMicros / timeUnitMicros) * this._lineDistance;
+    const leftScrollAmount = 
+        (startOffsetMicros / timeUnitMicros) * this._lineDistance;
+    const endPointOfWidth = 
+        (endOffsetMicros / timeUnitMicros) * this._lineDistance;
+
     const totalWidth = endPointOfWidth - leftScrollAmount;
     this._width = totalWidth;
 
