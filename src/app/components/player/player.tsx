@@ -5,7 +5,6 @@ import { RootState } from '@/app/state/store';
 import { Status, togglePlay } from '@/app/state/trackdetails/trackdetails';
 import { Pause } from '@/assets/pause';
 import { Play } from '@/assets/play';
-import { VolumeLevels } from './volumelevels';
 import { Knob } from '../knob';
 import { addIntoAudioBank } from '@/app/state/audiostate';
 import { getRandomWindowId, randomColor } from '@/app/services/random';
@@ -13,6 +12,7 @@ import { addWindowToAction, VerticalAlignment } from '@/app/state/windowstore';
 import { MixerMaster } from '../mixer/mixer';
 import { Mixer } from '@/assets/mixer';
 import { animationBatcher } from '@/app/services/animationbatch';
+import { Orientation } from '../web/visual/volume_level';
 
 export enum TimeframeMode {
   Time,
@@ -149,7 +149,8 @@ export function Player() {
         }
       </span>
       <div className="speaker-decibel ml-4">
-        <VolumeLevels />
+        <volume-level orientation={Orientation.Horizontal} />
+        {/* <VolumeLevels /> */}
       </div>
       <div className="views flex ml-4">
         <button

@@ -1051,7 +1051,8 @@ export function Editor() {
                         <c-track-info
                           track={index}
                           entityCount={trackDetails[index].length}
-                        />
+                        >
+                        </c-track-info>
                       </div>
                     ))
                   }

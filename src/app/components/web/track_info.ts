@@ -2,6 +2,7 @@ export class TrackInfoElement extends HTMLElement {
     trackInfo: HTMLSpanElement = document.createElement('span');
     ecount = 0;
     trackId = 0;
+    slotElement: HTMLSlotElement = document.createElement('slot');
 
     get track() {
         return this.trackId;
@@ -26,9 +27,11 @@ export class TrackInfoElement extends HTMLElement {
 
     connectedCallback() {
         // this.trackInfo = document.createElement('span');
-        this.classList.add('flex', 'flex-row', 'justify-center')
+        this.classList.add('flex', 'flex-col', 'justify-center');
         this.trackInfo.classList.add('block', 'text-lg', 'select-none');
+        this.draggable = false;
         this.appendChild(this.trackInfo);
+        this.appendChild(this.slotElement);
         this.constructTrackInformation();
     }
     
@@ -39,19 +42,19 @@ export class TrackInfoElement extends HTMLElement {
 
 
 declare global {
-  interface HTMLElementTagNameMap {
-    'c-track-info': TrackInfoElement;
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        'c-track-info': React.HTMLAttributes<HTMLElement> & 
-          React.RefAttributes<TrackInfoElement> & {
-            track: number;
-            entityCount: number;
-          };
-      }
+    interface HTMLElementTagNameMap {
+        'c-track-info': TrackInfoElement;
     }
-  }
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                'c-track-info': React.HTMLAttributes<HTMLElement> & 
+                React.RefAttributes<TrackInfoElement> & {
+                    track: number;
+                    entityCount: number;
+                };
+            }
+        }
+    }
 }
 

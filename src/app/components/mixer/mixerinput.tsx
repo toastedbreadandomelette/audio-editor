@@ -2,7 +2,7 @@ import React from 'react';
 import {Knob} from '../knob';
 import {Slider} from '../slider';
 import {audioManager} from '@/app/services/audio/audiotrackmanager';
-import {Orientation, VolumeLevels} from '../player/volumelevels';
+import { Orientation } from '../web/visual/volume_level';
 
 export function MixerInput(props: React.PropsWithoutRef<{
   mixerNumber: number
@@ -26,10 +26,16 @@ export function MixerInput(props: React.PropsWithoutRef<{
 
   return (
     <div className="p-2 bg-secondary m-1 shadow-md content-center items-center text-center mb-4">
-      <VolumeLevels
+      <volume-level
+        orientation={Orientation.Vertical}
+        mixer={props.mixerNumber}
+        width={7}
+        length={160}
+      ></volume-level>
+      {/* <VolumeLevels
         orientation={Orientation.Vertical}
         mixerNumber={props.mixerNumber}
-      />
+      /> */}
       <div className="panner-value mb-6">
         <Knob 
           pd={10}
