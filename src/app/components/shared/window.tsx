@@ -1,7 +1,6 @@
-import React from "react";
-import {css} from "@/app/services/utils";
-import {Exit} from "@/assets/exit";
-import {FaWindowMinimize} from "react-icons/fa";
+import React from 'react';
+import {css} from '@/app/services/utils';
+import {FaWindowMinimize} from 'react-icons/fa';
 import {HorizontalAlignment, VerticalAlignment} from '../../state/windowstore';
 
 /**
@@ -131,7 +130,7 @@ export function Window(props: React.PropsWithChildren<{
             />
           </div>
           <div className="px-3 text-center w-full h-full content-center bg-red-500 cursor-pointer hover:bg-red-600" onClick={triggerClose}>
-            <Exit w={10} h={10} fill={'white'} />
+            <exit-icon w={10} h={10} fill={'white'} />
           </div>
         </div>
       </div>

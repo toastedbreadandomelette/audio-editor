@@ -5,7 +5,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import {Window} from './window';
 import {FaWindowMaximize} from 'react-icons/fa';
 import {css} from '@/app/services/utils';
-import {Exit} from '@/assets/exit';
 
 import {
   focusWindow,
@@ -38,7 +37,7 @@ function WindowManagerTab(props: React.PropsWithoutRef<WindowManagerTabProps>) {
         className="ml-4 py-1 hover:bg-slate-600"
         onClick={() => props.onClose(props.index)}
       >
-        <Exit fill="#CC6545" h={10} w={10} />
+        <exit-icon fill="#CC6545" h={10} w={10} />
       </span>
     </div>
   );

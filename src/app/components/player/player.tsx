@@ -150,7 +150,6 @@ export function Player() {
       </span>
       <div className="speaker-decibel ml-4">
         <volume-level orientation={Orientation.Horizontal} />
-        {/* <VolumeLevels /> */}
       </div>
       <div className="views flex ml-4">
         <button

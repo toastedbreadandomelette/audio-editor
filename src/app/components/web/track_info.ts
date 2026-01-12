@@ -26,7 +26,6 @@ export class TrackInfoElement extends HTMLElement {
     }
 
     connectedCallback() {
-        // this.trackInfo = document.createElement('span');
         this.classList.add('flex', 'flex-col', 'justify-center');
         this.trackInfo.classList.add('block', 'text-lg', 'select-none');
         this.draggable = false;
@@ -39,7 +38,6 @@ export class TrackInfoElement extends HTMLElement {
         this.trackInfo.textContent = `Track ${this.track + 1} (${this.ecount})`;
     }
 }
-
 
 declare global {
     interface HTMLElementTagNameMap {
@@ -57,4 +55,3 @@ declare global {
         }
     }
 }
-

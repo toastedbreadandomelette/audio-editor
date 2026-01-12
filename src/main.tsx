@@ -11,6 +11,8 @@ import { AudioTrackElement } from './app/components/web/audiotrack';
 import { TrackInfoElement } from './app/components/web/track_info';
 import { KnobControlElement } from './app/components/web/controls/knob';
 import { VolumeLevelsElement } from './app/components/web/visual/volume_level';
+import { ExitIconElement } from './assets/exit';
+import { SliderControlElement } from './app/components/web/controls/slider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -32,6 +34,8 @@ function init() {
   customElements.define('c-track-info', TrackInfoElement);
   customElements.define('knob-control', KnobControlElement);
   customElements.define('volume-level', VolumeLevelsElement);
+  customElements.define('exit-icon', ExitIconElement);
+  customElements.define('slider-control', SliderControlElement);
 }
 
 init();
