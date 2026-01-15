@@ -96,6 +96,7 @@ export class KnobControlElement extends HTMLElement {
         this.totalWidth = this.cx * 2;
         this.svg.setAttribute('width', this.totalWidth.toString());
         this.svg.setAttribute('height', this.totalWidth.toString());
+        this.classList.add('flex', 'justify-center', 'touch-none');
         this.render();
         this.onmousedown = this.holdKnob.bind(this);
         this.onmousemove = this.moveKnob.bind(this);

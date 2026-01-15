@@ -11,7 +11,7 @@ export class SliderControlElement extends HTMLElement {
     s = '#2135EF';
 
     set sliderWidth(s: number) {
-        this.headw  = s;
+        this.headw = s;
     }
 
     get sliderWidth() {
@@ -34,6 +34,25 @@ export class SliderControlElement extends HTMLElement {
     rect3 = document.createElementNS(SVGXMLNS, 'rect');
     g = document.createElementNS(SVGXMLNS, 'g');
 
+    onSliderChng: (value: number) => void = () => {};
+    onSliderRel: (value: number) => void = () => {};
+
+    get onSliderChange() {
+        return this.onSliderChng;
+    }
+
+    set onSliderChange(callback: (value: number) => void) {
+        this.onSliderChng = callback;
+    }
+
+    get onSliderRelease() {
+        return this.onSliderRel;
+    }
+    
+    set onSliderRelease(callback: (value: number) => void) {
+        this.onSliderRel = callback;
+    }
+
     get stroke() {
         return this.s;
     }
@@ -48,7 +67,9 @@ export class SliderControlElement extends HTMLElement {
 
     set value(val: number) {
         this.val = val;
-        this.updateSlider();
+        if (this.isConnected) {
+            this.updateSlider();
+        }
     }
 
     get w() {
@@ -142,6 +163,9 @@ export class SliderControlElement extends HTMLElement {
             );
 
             this.value = normalizedValue;
+            if (this.onSliderChng) {
+                this.onSliderChng(this.value);
+            }
             this.updateSlider();
         }
     }
@@ -155,11 +179,15 @@ export class SliderControlElement extends HTMLElement {
         const newValue = clamp(this.value + direction * 0.05, 0, 1);
     
         this.value = newValue;
+        if (this.onSliderChng) {
+            this.onSliderChng(this.value);
+        }
         this.updateSlider(); 
     }
 
     disconnectedCallback() {
         this.removeEventListener('wheel', this.onScroll.bind(this));
+        this.addEventListener('mousemove', this.onMouseMove.bind(this));
     }
 
     createRect(x: string, level: string, fill: string, sheight: string, width: string) {

@@ -13,6 +13,7 @@ import { KnobControlElement } from './app/components/web/controls/knob';
 import { VolumeLevelsElement } from './app/components/web/visual/volume_level';
 import { ExitIconElement } from './assets/exit';
 import { SliderControlElement } from './app/components/web/controls/slider';
+import { MixerInputElement } from './app/components/web/mixer/mixerinput';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -36,6 +37,7 @@ function init() {
   customElements.define('volume-level', VolumeLevelsElement);
   customElements.define('exit-icon', ExitIconElement);
   customElements.define('slider-control', SliderControlElement);
+  customElements.define('mixer-input', MixerInputElement);
 }
 
 init();

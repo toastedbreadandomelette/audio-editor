@@ -17,10 +17,11 @@ export function MixerMaster(props: React.PropsWithoutRef<MixerProps>) {
       <div className="mixer flex flex-row">
         {
           Array.from({length: totalMixers}, (_, index: number) => (
-            <MixerInput
-              mixerNumber={index + 1}
-              key={index}
-            />
+            <mixer-input index={index + 1} key={index}></mixer-input>
+            // <MixerInput
+            //   mixerNumber={index + 1}
+            //   key={index}
+            // />
           ))
         }
       </div>

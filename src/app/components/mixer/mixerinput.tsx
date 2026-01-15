@@ -48,14 +48,14 @@ export function MixerInput(props: React.PropsWithoutRef<{
         <label className="text-md select-none">Pan</label>
       </div>
       <div className="volume mb-6">
-        {/* <slider-control
+        <slider-control
           h={200}
           w={30}
           pd={20}
           sliderHeight={12}
           sliderWidth={30}   
-        ></slider-control> */}
-        <Slider 
+        ></slider-control>
+        {/* <Slider 
           h={200}
           headh={12}
           headw={30}
@@ -66,7 +66,7 @@ export function MixerInput(props: React.PropsWithoutRef<{
           lineThickness={4}
           activeStroke="#58AB6C"
           pd={20}
-        />
+        /> */}
         <label className="text-md select-none">Vol</label>
       </div>
       <span className="text-nowrap text-sm select-none">
