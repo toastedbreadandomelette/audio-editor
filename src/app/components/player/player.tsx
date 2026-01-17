@@ -9,46 +9,12 @@ import { Knob } from '../knob';
 import { addIntoAudioBank } from '@/app/state/audiostate';
 import { getRandomWindowId, randomColor } from '@/app/services/random';
 import { addWindowToAction, VerticalAlignment } from '@/app/state/windowstore';
-import { MixerMaster } from '../mixer/mixer';
 import { Mixer } from '@/assets/mixer';
-import { animationBatcher } from '@/app/services/animationbatch';
 import { Orientation } from '../web/visual/volume_level';
 
 export enum TimeframeMode {
   Time,
   Beat
-}
-
-export function Timer() {
-  const [timer, setTimer] = React.useState('00:00');
-  const ref = React.createRef<HTMLDivElement>();
-  
-  React.useEffect(() => {
-    let intervalId: symbol | null = null;
-    intervalId = animationBatcher.addAnimationHandler(animateTimer);
-
-    function animateTimer() {
-      const currentTime = audioManager.getTimestamp();
-      const minutes = Math.floor(currentTime / 60);
-      const seconds = Math.floor(currentTime - minutes * 60);
-      setTimer(`${(minutes < 10 ? '0' : '') + minutes}:${(seconds < 10 ? '0' : '') + seconds}`);
-    }
-
-    animationBatcher.setAnimationFrameRate(intervalId, 60);
-
-    return () => {
-      animationBatcher.removeAnimationHandler(intervalId);
-    }
-  });
-
-  return (
-    <div
-      className="timer bg-secondary text-2xl text-pretty p-2 rounded-md min-w-28 text-center select-none"
-      ref={ref}
-    >
-      {timer}
-    </div>
-  )
 }
 
 export function Player() {
@@ -85,7 +51,7 @@ export function Player() {
         y: 10,
         overflow: true,
         verticalAlignment: VerticalAlignment.Bottom,
-        view: MixerMaster,
+        view: () => <><c-mixer mixerCount={audioManager.totalMixers} /></>,
         visible: true,
         windowSymbol: Symbol(),
         w: 1200,
@@ -137,7 +103,7 @@ export function Player() {
         />
         <div>{Math.round(masterVol * 100)}</div>
       </div>
-      <Timer />
+      <timer-tempo />
       <span
         onClick={pause}
         className="ml-2 pause play bg-secondary p-2 rounded-md cursor-pointer"

@@ -172,6 +172,14 @@ export class Mixer {
     this.gainNodes[mixerNumber].gain.value = value;
   }
 
+  getGainAudioParam(mixerNumber: number): AudioParam {
+    console.assert(
+      mixerNumber >= 0 && mixerNumber <= this.totalMixerCount, 
+      'Invalid mixer number: ' + mixerNumber
+    );
+    return this.gainNodes[mixerNumber].gain;
+  }
+
   setPanValue(mixerNumber: number, value: number) {
     console.assert(value >= -1 && value <= 1);
     console.assert(
@@ -180,6 +188,15 @@ export class Mixer {
     );
 
     this.panNodes[mixerNumber].pan.value = value;
+  }
+
+  getPannerAudioParam(mixerNumber: number): AudioParam {
+    console.assert(
+      mixerNumber >= 0 && mixerNumber <= this.totalMixerCount, 
+      'Invalid mixer number: ' + mixerNumber
+    );
+
+    return this.panNodes[mixerNumber].pan;
   }
 };
 

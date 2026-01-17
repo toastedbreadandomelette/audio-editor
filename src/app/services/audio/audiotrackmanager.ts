@@ -309,8 +309,16 @@ class AudioTrackManager {
     this.mixer.useMixer().setGainValue(mixer, vol);
   }
 
+  getGainAudioParamFromMixer(mixer: number) {
+    return this.mixer.useMixer().getGainAudioParam(mixer);
+  }
+
   setPannerNodeForMixer(mixer: number, pan: number) {
-    this.mixer.useMixer().setPanValue(mixer, pan);
+    return this.mixer.useMixer().setPanValue(mixer, pan);
+  }
+  
+  getPannerAudioParamFromMixer(mixer: number) {
+    return this.mixer.useMixer().getPannerAudioParam(mixer);
   }
 
   storeOffscreenCanvasDrawn(audioSymbolKey: symbol, canvas: OffscreenCanvas) {

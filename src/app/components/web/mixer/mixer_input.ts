@@ -42,6 +42,7 @@ export class MixerInputElement extends HTMLElement {
         };
         knob.value = 0;
         knob.scrollD = 0.05;
+        knob.aParamControl = audioManager.getPannerAudioParamFromMixer(index);
     }
 
     static setDefaultSettingsForSlider(slider: SliderControlElement, index: number) {
@@ -58,6 +59,7 @@ export class MixerInputElement extends HTMLElement {
         slider.onSliderRelease = function(e: number) {
             audioManager.setGainNodeForMixer(index, e);
         };
+        slider.aParamControl = audioManager.getGainAudioParamFromMixer(index);
     }
 
     connectedCallback() {

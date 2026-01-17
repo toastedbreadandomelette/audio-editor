@@ -44,6 +44,19 @@ export class KnobControlElement extends HTMLElement {
     cx = 0;
     cy = 0;
     totalWidth = 0;
+    aparam: AudioParam | null = null;
+    mapper = (num: number) => num; 
+
+    set aParamControl(aParam: AudioParam) {
+        this.aparam = aParam;
+        this.mapper = (number) => {
+            return this.aparam!.minValue + (this.aparam!.maxValue - this.aparam!.minValue) * number;
+        };
+    }
+
+    get aParam() {
+        return this.aparam;
+    }
     // SVG
     svg = document.createElementNS(SVGXMLNS, 'svg');
     // Ring
@@ -58,8 +71,6 @@ export class KnobControlElement extends HTMLElement {
     onKnobChange: Maybe<(n: number) => void> = null;
     // knobrelease
     onKnobRelease: Maybe<(n: number) => void> = null;
-    // Value mapping
-    valueMap: (value: number) => number = (x: number) => x;
 
     get r() {
         return this.radius;
@@ -102,19 +113,21 @@ export class KnobControlElement extends HTMLElement {
         this.onmousemove = this.moveKnob.bind(this);
     }
 
-    releaseKnob(event: MouseEvent) {
+    releaseKnob(_: MouseEvent) {
         this.verticalHold = 0;
         this.valueOnHold = 0;
-        // this.onKnobRelease && this.onKnobRelease(this.val);
+        if (this.onKnobRelease) {
+            this.onKnobRelease(this.mapper(this.val));
+        }
     }
 
     holdKnob(event: MouseEvent) {
         this.verticalHold = event.offsetY;
         this.valueOnHold = this.val;
 
-        const custom = new CustomEvent('knobChange', {detail: this.val});
-        this.dispatchEvent(custom);
-        // this.onKnobChange && this.onKnobChange(this.val);
+        if (this.onKnobChange) {
+            this.onKnobChange(this.mapper(this.val));
+        }
     }
 
     moveKnob(event: MouseEvent) {
@@ -126,10 +139,9 @@ export class KnobControlElement extends HTMLElement {
             // Some initial value hold should be there.
             const delta = (offsetY - this.verticalHold) / this.totalWidth;
             this.val = clamp(this.valueOnHold + delta, 0, 1);
-            // if (this.onKnobChange) {
-            const custom = new CustomEvent('knobChange', {detail: this.val});
-            this.dispatchEvent(custom);
-            // }
+            if (this.onKnobChange) {
+                this.onKnobChange(this.mapper(this.val));
+            }
             this.changePath();
         }
     }
@@ -226,6 +238,7 @@ declare global {
                     pd: number;
                     value: number;
                     scrollDelta: number;
+                    aParamControl?: AudioParam;
                     onKnobChange: (value: number) => void;
                     onKnobRelease: (value: number) => void;
                     map?: (value: number) => number;

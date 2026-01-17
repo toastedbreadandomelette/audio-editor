@@ -1,4 +1,4 @@
-import { clamp, SVGXMLNS } from '@/app/utils';
+import {clamp, SVGXMLNS} from '@/app/utils';
 
 export class SliderControlElement extends HTMLElement {
     width = 100;
@@ -6,9 +6,23 @@ export class SliderControlElement extends HTMLElement {
     padding = 10;
     strokeWidth = 3;
     val = 0;
+    mappedValue = 0;
     headw = 20;
     headh = 10;
     s = '#2135EF';
+    aparam: AudioParam | null = null;
+    mapper = (num: number) => num; 
+
+    set aParamControl(aParam: AudioParam) {
+        this.aparam = aParam;
+        this.mapper = (number: number) => {
+            return this.aparam!.minValue + (this.aparam!.maxValue - this.aparam!.minValue) * number;
+        }
+    }
+
+    get aParam() {
+        return this.aparam;
+    }
 
     set sliderWidth(s: number) {
         this.headw = s;
@@ -164,7 +178,7 @@ export class SliderControlElement extends HTMLElement {
 
             this.value = normalizedValue;
             if (this.onSliderChng) {
-                this.onSliderChng(this.value);
+                this.onSliderChng(this.mapper(this.value));
             }
             this.updateSlider();
         }
@@ -180,7 +194,7 @@ export class SliderControlElement extends HTMLElement {
     
         this.value = newValue;
         if (this.onSliderChng) {
-            this.onSliderChng(this.value);
+            this.onSliderChng(this.mapper(this.value));
         }
         this.updateSlider(); 
     }
@@ -235,6 +249,7 @@ declare global {
                     sw?: number;
                     sliderWidth?: number;
                     sliderHeight?: number;
+                    aParamControl?: AudioParam;
 
                     onSliderChange?: (value: number) => void;
                     onSliderRelease?: (value: number) => void;

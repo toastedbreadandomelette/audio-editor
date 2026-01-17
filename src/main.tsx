@@ -13,7 +13,9 @@ import { KnobControlElement } from './app/components/web/controls/knob';
 import { VolumeLevelsElement } from './app/components/web/visual/volume_level';
 import { ExitIconElement } from './assets/exit';
 import { SliderControlElement } from './app/components/web/controls/slider';
-import { MixerInputElement } from './app/components/web/mixer/mixerinput';
+import { MixerInputElement } from './app/components/web/mixer/mixer_input';
+import { MixerElement } from './app/components/web/mixer/mixer';
+import { TimerOrTempoElement } from './app/components/web/player/timer';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -38,6 +40,8 @@ function init() {
   customElements.define('exit-icon', ExitIconElement);
   customElements.define('slider-control', SliderControlElement);
   customElements.define('mixer-input', MixerInputElement);
+  customElements.define('c-mixer', MixerElement);
+  customElements.define('timer-tempo', TimerOrTempoElement);
 }
 
 init();
