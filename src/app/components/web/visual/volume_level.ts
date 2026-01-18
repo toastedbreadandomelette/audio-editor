@@ -165,7 +165,14 @@ export class VolumeLevelsElement extends HTMLElement {
         this.leftCanvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.rightCanvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-        if (this.mixerNumber === undefined) {
+        const length = audioManager.getBufferLengthForTimeDomainData();
+
+        if (length !== this.leftBuffer.length) {
+            this.leftBuffer = new Uint8Array(length);
+            this.rightBuffer = new Uint8Array(length);
+        }
+
+        if (this.mixerNumber === undefined) { 
             audioManager.getTimeData(this.leftBuffer, this.rightBuffer);
         } else {
             audioManager.getTimeDataFromMixer(this.mixerNumber, this.leftBuffer, this.rightBuffer);

@@ -132,10 +132,10 @@ export class Mixer {
           const {left, right} = this.analyserNodes[index];
           channelSplitter.connect(left, 0);
           channelSplitter.connect(right, 1);
-          // left.fftSize = 512;
-          // right.fftSize = 512;
-          // left.smoothingTimeConstant = 0.4;
-          // right.smoothingTimeConstant = 0.4;
+          left.fftSize = 512;
+          right.fftSize = 512;
+          left.smoothingTimeConstant = 0.4;
+          right.smoothingTimeConstant = 0.4;
 
           return channelSplitter;
         });

@@ -383,44 +383,10 @@ class AudioTrackManager {
 
     --index;
 
-    // Currently assume that all points are linear
-    // Get current value
     const currPoint = automation.points[index];
     const nextPoint = automation.points[index + 1];
     const proportion = (seekbarOffsetInMicros - currPoint.time) / (nextPoint.time - currPoint.time);
     const currentValue = (nextPoint.value - currPoint.value) * proportion + currPoint.value;
-
-    // const sear
-
-    // const startTimeSecs = startTime / SEC_TO_MICROSEC;
-    // const trackDurationSecs = endTime / SEC_TO_MICROSEC;
-    // const distance = (seekbarOffsetInMicros - trackOffsetMicros) / SEC_TO_MICROSEC;
-
-    // const bufferSource = context.createBufferSource();
-    // bufferSource.buffer = this.getAudioBuffer(audioId);
-    // bufferSource.connect(pannerNodes);
-
-    // const offsetStart = startTimeSecs + Math.max(distance, 0);
-
-    // bufferSource.start(
-    //   currentTime + Math.max(-distance, 0), 
-    //   offsetStart,
-    //   trackDurationSecs - offsetStart
-    // );
-
-    // this.offlineScheduledNodes[scheduledKey] = {
-    //   audioId,
-    //   buffer: bufferSource,
-    //   details: track.trackDetail
-    // };
-
-    // bufferSource.onended = () => {
-    //   if (Object.hasOwn(this.offlineScheduledNodes, scheduledKey)) {
-    //     const node = this.offlineScheduledNodes[scheduledKey];
-    //     node.buffer.disconnect();
-    //     delete this.offlineScheduledNodes[scheduledKey];
-    //   }
-    // }
   }
 
   scheduleOffline(
@@ -595,6 +561,11 @@ class AudioTrackManager {
 
     left.getByteTimeDomainData(stereoLeftBuffer);
     right.getByteTimeDomainData(stereoRightBuffer);
+  }
+
+  getBufferLengthForTimeDomainData() {
+    const {left} = this.mixer.useMixer().analyserNodes[0];
+    return left.fftSize;
   }
 
   /**

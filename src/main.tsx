@@ -16,6 +16,9 @@ import { SliderControlElement } from './app/components/web/controls/slider';
 import { MixerInputElement } from './app/components/web/mixer/mixer_input';
 import { MixerElement } from './app/components/web/mixer/mixer';
 import { TimerOrTempoElement } from './app/components/web/player/timer';
+import { WindowHeaderElement } from './app/components/web/shared/window/header';
+import { WindowElement } from './app/components/web/shared/window/window';
+import { SeekerElement } from './app/components/web/editor/seeker/seeker';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -31,6 +34,8 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
+
+// TODO: Export custom element defining function later
 function init() {
   customElements.define('c-marker', MarkerElement);
   customElements.define('audio-track', AudioTrackElement);
@@ -42,6 +47,9 @@ function init() {
   customElements.define('mixer-input', MixerInputElement);
   customElements.define('c-mixer', MixerElement);
   customElements.define('timer-tempo', TimerOrTempoElement);
+  customElements.define('window-header', WindowHeaderElement);
+  customElements.define('c-window', WindowElement);
+  customElements.define('c-seeker', SeekerElement);
 }
 
 init();

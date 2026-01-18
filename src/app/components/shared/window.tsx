@@ -85,6 +85,15 @@ export function Window(props: React.PropsWithChildren<{
   }
 
   return (
+    // <c-window
+    //   headerName='Header'
+    //   Id={props.index}
+    //   width={props.w}
+    //   height={props.h}
+    //   left={props.x}
+    //   top={props.y}
+    //   zIndex={props.zLevel}
+    // >{props.children}</c-window>
     <div
       className={css(
         "absolute border-2 flex flex-col border-solid border-slate-800 rounded-sm z-[100] transition-shadow ease-in-out shadow-black",
@@ -103,37 +112,15 @@ export function Window(props: React.PropsWithChildren<{
         zIndex: props.zLevel + 100,
       }}
     >
-      <div
-        className="topbar bg-secondary flex flex-row justify-between"
-      >
-        <div
-          className={css("header-content select-none px-3 py-2 text-lg rounded-ss-sm w-full text-left", !hold ? 'cursor-grab' : 'cursor-grabbing')}
-          onMouseDown={() => {
-            onWindowClick();
-            setHold(true);
-          }}
-          onMouseUp={() => setHold(false)}
-          onMouseLeave={() => setHold(false)}
-        >
-          {props.header || 'Navbar'}
-        </div>
-        <div
-          className="header-tool flex flex-row rounded-se-sm"
-        >
-          <div 
-            className="px-3 text-xs text-center w-full h-full content-center text-yellow-500 cursor-pointer hover:text-yellow-600"
-            onClick={triggerMinimize}
-          >
-            <FaWindowMinimize
-              width={10}
-              height={10} 
-            />
-          </div>
-          <div className="px-3 text-center w-full h-full content-center bg-red-500 cursor-pointer hover:bg-red-600" onClick={triggerClose}>
-            <exit-icon w={10} h={10} fill={'white'} />
-          </div>
-        </div>
-      </div>
+      <window-header
+        onMouseDown={() => {
+          onWindowClick();
+          setHold(true);
+        }}
+        onMouseUp={() => setHold(false)}
+        onMouseLeave={() => setHold(false)}
+        headerName={'Header'}
+      />
       <div className={css(
         "content flex bg-primary w-full h-full rounded-es-sm rounded-ee-sm",
         {

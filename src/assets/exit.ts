@@ -47,6 +47,10 @@ export class ExitIconElement extends HTMLElement {
         svg.appendChild(path);
         this.appendChild(svg);
     }
+
+    disconnectedCallback() {
+        this.remove();
+    }
 }
 
 declare global {

@@ -1,12 +1,12 @@
 import React from 'react';
 import {SVGXMLNS} from '@/app/utils';
-import {Seeker} from './seeker';
 import {audioManager} from '@/app/services/audio/audiotrackmanager';
 import {useSelector} from 'react-redux';
 import {RootState} from '@/app/state/store';
 import {ModeType} from './toolkit';
 import {SEC_TO_MICROSEC} from '@/app/state/trackdetails/trackdetails';
 import {REGION_SELECT_TIMELIMIT_MICROSEC} from '@/app/services/audio/clock';
+import { SeekerElement } from '../web/editor/seeker/seeker';
 
 /**
  * @description Timeframe selected by the user.
@@ -51,7 +51,7 @@ interface SeekbarProps {
   /**
    * @description Scroll Ref
    */
-  seekerRef: React.RefObject<HTMLDivElement | null>
+  seekerRef: React.RefObject<SeekerElement | null>
   /**
    * @description Emits an event when a region is selected.
    */
@@ -66,6 +66,9 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
   // Redux States
   const tracks = useSelector((state: RootState) => (
     state.trackDetailsReducer.trackDetails
+  ));
+  const status = useSelector((state: RootState) => (
+    state.trackDetailsReducer.status
   ));
   // Component states
   const [isUserSelecting, setIsUserSelecting] = React.useState(false);
@@ -194,14 +197,12 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
 
   return (
     <>
-      <Seeker
+      <c-seeker
+        status={status}
         ref={seekerRef}
-        timePerUnitLine={timeUnit}
-        lineDist={lineDist}
-        seekOffset={0}
-        left={left}
-        onLoopEnd={onLoopEnd}
-      />
+        timeBetweenLine={timeUnit}
+        lineDistance={lineDist}
+      ></c-seeker>
       <div
         className="relative overflow-hidden bg-darker rounded-sm z-[12] border-t border-b border-solid border-darker-2 cursor-pointer shadow-bg"
         onClick={seekToPoint}
