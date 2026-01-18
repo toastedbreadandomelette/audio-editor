@@ -164,31 +164,31 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
 
   // This might take some time.
   // Will look for alternatives later.
-  const timeData = Array.from(
-    {length: Math.floor(props.totalLines / labelMultiplier)},
-    (_, index: number) => {
-      const time = (timeUnit * labelMultiplier * (index + 1));
-      const currMinute = Math.floor(time / 60);
-      const currSecond = Math.floor(time) % 60;
+  // const timeData = Array.from(
+  //   {length: Math.floor(props.totalLines / labelMultiplier)},
+  //   (_, index: number) => {
+  //     const time = (timeUnit * labelMultiplier * (index + 1));
+  //     const currMinute = Math.floor(time / 60);
+  //     const currSecond = Math.floor(time) % 60;
 
-      return (
-        <text
-          key={index}
-          className="select-none"
-          fill="#ccc"
-          strokeWidth={1}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontSize={16}
-          dy={25}
-          dx={lineDist * labelMultiplier * (index + 1)}
-        >
-          {(currMinute < 10 ? "0" : "") + currMinute}:
-          {(currSecond < 10 ? "0" : "") + currSecond}
-        </text>
-      );
-    },
-  );
+  //     return (
+  //       <text
+  //         key={index}
+  //         className="select-none"
+  //         fill="#ccc"
+  //         strokeWidth={1}
+  //         textAnchor="middle"
+  //         dominantBaseline="middle"
+  //         fontSize={16}
+  //         dy={25}
+  //         dx={lineDist * labelMultiplier * (index + 1)}
+  //       >
+  //         {(currMinute < 10 ? "0" : "") + currMinute}:
+  //         {(currSecond < 10 ? "0" : "") + currSecond}
+  //       </text>
+  //     );
+  //   },
+  // );
 
   const startSecs = Math.min(startRegionSelection, endRegionSelection);
   const endSecs = Math.max(startRegionSelection, endRegionSelection);
@@ -212,7 +212,13 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
         onMouseUp={handleMouseRelease}
         ref={props.scrollRef}
       >
-        <svg xmlns={SVGXMLNS} width={props.w} height={30}>
+        <seek-timeline
+          w={props.w}
+          h={30}
+          totalLines={props.totalLines}
+          lineDistance={props.lineDist}
+        ></seek-timeline>
+        {/* <svg xmlns={SVGXMLNS} width={props.w} height={30}>
           <rect
             fill="#C5887666"
             x={startRegion}
@@ -221,7 +227,7 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
             height={30}
           ></rect>
           {timeData}
-        </svg>
+        </svg> */}
         <svg xmlns={SVGXMLNS} width={props.w} height={30}>
           <defs>
             <pattern

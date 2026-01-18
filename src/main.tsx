@@ -19,6 +19,7 @@ import { TimerOrTempoElement } from './app/components/web/player/timer';
 import { WindowHeaderElement } from './app/components/web/shared/window/header';
 import { WindowElement } from './app/components/web/shared/window/window';
 import { SeekerElement } from './app/components/web/editor/seeker/seeker';
+import { TimelineElement } from './app/components/web/editor/seeker/timeline';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -50,6 +51,7 @@ function init() {
   customElements.define('window-header', WindowHeaderElement);
   customElements.define('c-window', WindowElement);
   customElements.define('c-seeker', SeekerElement);
+  customElements.define('seek-timeline', TimelineElement);
 }
 
 init();
