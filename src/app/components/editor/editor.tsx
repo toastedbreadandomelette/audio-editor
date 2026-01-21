@@ -68,6 +68,9 @@ import {
 import { Maybe } from '@/app/services/interfaces';
 import { useMultiTrackMovement, useSingleTrackMovement } from './editormove';
 import { HistoryAction } from '@/app/state/trackdetails/tracksnapshots';
+import { SeekbarElement } from '../web/editor/seeker/seekbar';
+import { SeekerElement } from '../web/editor/seeker/seeker';
+import { TrackColumnElement } from '../web/editor/track_column';
 
 /**
  * @description Movable Type, for handling all the move events.
@@ -140,9 +143,9 @@ export function Editor() {
   const dispatch = useDispatch();
 
   // Refs
-  const ref = React.useRef<HTMLDivElement>(null);
-  const seekbarRef = React.useRef<HTMLDivElement>(null);
-  const seekerRef = React.useRef<HTMLDivElement>(null);
+  const ref = React.useRef<TrackColumnElement>(null);
+  const seekbarRef = React.useRef<SeekbarElement>(null);
+  const seekerRef = React.useRef<SeekerElement>(null);
   const scrollPageRef = React.useRef<HTMLDivElement>(null);
   const verticalScrollPageRef = React.useRef<HTMLDivElement>(null);
 
@@ -1040,7 +1043,13 @@ export function Editor() {
             <div className="flex flex-row max-w-full overflow-hidden min-w-screen">
               <div className="track-element flex flex-col min-h-28">
                 <div className="min-h-[62px] max-h-[62px] min-w-full bg-darker border-t border border-darker-2"></div>
-                <div ref={ref} className="track-list custom-list pb-2 relative overflow-hidden h-full max-h-full">
+                <track-column
+                  h={height}
+                  totalTracks={totalTracks}
+                  trackDetails={trackDetails}
+                  ref={ref}
+                ></track-column>
+                {/* <div ref={ref} className="track-list custom-list pb-2 relative overflow-hidden h-full max-h-full">
                   {
                     Array.from({length: totalTracks}, (_, index: number) => (
                       <div 
@@ -1056,7 +1065,7 @@ export function Editor() {
                       </div>
                     ))
                   }
-                </div>
+                </div> */}
               </div>
               <div className="track-info rounded-r-md text-center min-w-[0%] max-w-full">
                 <div className="workspace relative bg-primary overflow-hidden h-full">

@@ -57,6 +57,7 @@ export class TimelineElement extends HTMLElement {
 
     set timePerUnitLine(timeUnit: number) {
         this.timeUnit = timeUnit;
+        this.updateTextLeft();
     }
 
     set lineDistance(lineDist: number) {
@@ -84,8 +85,13 @@ export class TimelineElement extends HTMLElement {
 
     private updateTextLeft() {
         for (let index = 0; index < this.svg.children.length; ++index) {
+            const time = (index + 1) * this.timeUnit * this.labelTimeMultiplier;
+            const currMinute = Math.floor(time / 60);
+            const currSecond = Math.floor(time) % 60;
+
             const child = this.svg.children[index];
             child.setAttribute('dx', ((index + 1) * this.lineDist * this.labelTimeMultiplier).toString());
+            child.textContent = `${(currMinute < 10 ? "0" : "") + currMinute}:${(currSecond < 10 ? "0" : "") + currSecond}`;
         }
     }
 
@@ -110,7 +116,7 @@ export class TimelineElement extends HTMLElement {
             text.setAttribute('font-size', '16');
             text.setAttribute('dy', '25');
             text.setAttribute('dx', ((index + 1) * this.lineDist * this.labelTimeMultiplier).toString());
-            text.innerHTML = `${(currMinute < 10 ? "0" : "") + currMinute}:${(currSecond < 10 ? "0" : "") + currSecond}`;
+            text.textContent = `${(currMinute < 10 ? "0" : "") + currMinute}:${(currSecond < 10 ? "0" : "") + currSecond}`;
 
             frag.appendChild(text);
         }

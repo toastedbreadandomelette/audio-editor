@@ -3,13 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { audioManager } from '@/app/services/audio/audiotrackmanager';
 import { RootState } from '@/app/state/store';
 import { Status, togglePlay } from '@/app/state/trackdetails/trackdetails';
-import { Pause } from '@/assets/pause';
-import { Play } from '@/assets/play';
 import { Knob } from '../knob';
 import { addIntoAudioBank } from '@/app/state/audiostate';
 import { getRandomWindowId, randomColor } from '@/app/services/random';
 import { addWindowToAction, VerticalAlignment } from '@/app/state/windowstore';
-import { Mixer } from '@/assets/mixer';
 import { Orientation } from '../web/visual/volume_level';
 
 export enum TimeframeMode {
@@ -110,8 +107,8 @@ export function Player() {
       >
         {
         status === Status.Pause ? 
-          <Play c="#61E361" f="#51DE56" w={25} h={25} /> :
-          <Pause c="#E1E361" f="#D1D256" w={25} h={25} />
+          <play-icon s="#61E361" f="#51DE56" w={25} h={25} /> :
+          <pause-icon s="#E1E361" f="#D1D256" w={25} h={25} />
         }
       </span>
       <div className="speaker-decibel ml-4">
@@ -123,7 +120,7 @@ export function Player() {
           className="border border-solid border-slate-600 rounded-sm hover:bg-slate-600 active:bg-slate-800"
           onClick={openMixer}
         >
-          <Mixer w={40} h={40} stroke="rgb(100 116 139)" />
+          <mixer-icon w={40} h={40} s="rgb(100 116 139)" />
         </button>
       </div>
     </div>

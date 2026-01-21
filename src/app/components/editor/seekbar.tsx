@@ -7,6 +7,7 @@ import {ModeType} from './toolkit';
 import {SEC_TO_MICROSEC} from '@/app/state/trackdetails/trackdetails';
 import {REGION_SELECT_TIMELIMIT_MICROSEC} from '@/app/services/audio/clock';
 import { SeekerElement } from '../web/editor/seeker/seeker';
+import { SeekbarElement } from '../web/editor/seeker/seekbar';
 
 /**
  * @description Timeframe selected by the user.
@@ -47,7 +48,7 @@ interface SeekbarProps {
   /**
    * @description Scroll Ref
    */
-  scrollRef: React.RefObject<HTMLDivElement | null>
+  scrollRef: React.RefObject<SeekbarElement | null>
   /**
    * @description Scroll Ref
    */
@@ -203,7 +204,14 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
         timeBetweenLine={timeUnit}
         lineDistance={lineDist}
       ></c-seeker>
-      <div
+      <c-seekbar
+        h={30}
+        lineDistance={props.lineDist}
+        totalLines={props.totalLines}
+        w={props.w}
+        ref={props.scrollRef}
+      ></c-seekbar>
+      {/* <div
         className="relative overflow-hidden bg-darker rounded-sm z-[12] border-t border-b border-solid border-darker-2 cursor-pointer shadow-bg"
         onClick={seekToPoint}
         onMouseDown={handleMouseDown}
@@ -218,7 +226,7 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
           totalLines={props.totalLines}
           lineDistance={props.lineDist}
         ></seek-timeline>
-        {/* <svg xmlns={SVGXMLNS} width={props.w} height={30}>
+        <svg xmlns={SVGXMLNS} width={props.w} height={30}>
           <rect
             fill="#C5887666"
             x={startRegion}
@@ -227,7 +235,7 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
             height={30}
           ></rect>
           {timeData}
-        </svg> */}
+        </svg>
         <svg xmlns={SVGXMLNS} width={props.w} height={30}>
           <defs>
             <pattern
@@ -253,7 +261,7 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
             height={30}
           ></rect>
         </svg>
-      </div>
+      </div> */}
     </>
   );
 }

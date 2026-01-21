@@ -20,6 +20,11 @@ import { WindowHeaderElement } from './app/components/web/shared/window/header';
 import { WindowElement } from './app/components/web/shared/window/window';
 import { SeekerElement } from './app/components/web/editor/seeker/seeker';
 import { TimelineElement } from './app/components/web/editor/seeker/timeline';
+import { MixerIconElement } from './assets/mixer';
+import { PauseIconElement } from './assets/pause';
+import { PlayIconElement } from './assets/play';
+import { SeekbarElement } from './app/components/web/editor/seeker/seekbar';
+import { TrackColumnElement } from './app/components/web/editor/track_column';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -52,6 +57,11 @@ function init() {
   customElements.define('c-window', WindowElement);
   customElements.define('c-seeker', SeekerElement);
   customElements.define('seek-timeline', TimelineElement);
+  customElements.define('mixer-icon', MixerIconElement);
+  customElements.define('pause-icon', PauseIconElement);
+  customElements.define('play-icon', PlayIconElement);
+  customElements.define('c-seekbar', SeekbarElement);
+  customElements.define('track-column', TrackColumnElement);
 }
 
 init();

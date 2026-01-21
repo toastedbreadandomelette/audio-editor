@@ -13,6 +13,7 @@ class AnimationBatcher {
     }
   } = {};
   masterHandler: number = 0;
+  boundRun = this.run.bind(this)
 
   constructor() {}
 
@@ -52,7 +53,7 @@ class AnimationBatcher {
       }
     }
 
-    this.masterHandler = requestAnimationFrame(this.run.bind(this));
+    this.masterHandler = requestAnimationFrame(this.boundRun);
     return this.masterHandler;
   }
 
