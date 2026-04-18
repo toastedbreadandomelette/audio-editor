@@ -112,7 +112,7 @@ export function Window(props: React.PropsWithChildren<{
         zIndex: props.zLevel + 100,
       }}
     >
-      <window-header
+      {/* <window-header
         onMouseDown={() => {
           onWindowClick();
           setHold(true);
@@ -120,7 +120,7 @@ export function Window(props: React.PropsWithChildren<{
         onMouseUp={() => setHold(false)}
         onMouseLeave={() => setHold(false)}
         headerName={'Header'}
-      />
+      /> */}
       <div className={css(
         "content flex bg-primary w-full h-full rounded-es-sm rounded-ee-sm",
         {

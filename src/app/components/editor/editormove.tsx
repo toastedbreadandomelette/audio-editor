@@ -23,6 +23,9 @@ export function useMultiTrackMovement(mode: AudioTrackManipulationMode) {
   }
 }
 
+// TODO: move this to some parent element from the child element.
+// Let the child element fire this and let the parent element listen
+// to dragging.
 export function useSingleTrackMovement({
   mode,
   movableEntity,
@@ -83,6 +86,9 @@ export function useSingleTrackMovement({
       // Manipulate width, scrollLeft and offset based on the initial position.
       // The width cannot exceed the scroll width.
       case AudioTrackManipulationMode.ResizeEnd:
+        console.log(
+          width, initialScrollLeft, initialTrackWidth, position, diffAnchorX
+        );
         movableEntity.style.width = min(
           movableEntity.scrollWidth - 2 * initialScrollLeft,
           initialTrackWidth + diffAnchorX

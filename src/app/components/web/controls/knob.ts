@@ -54,8 +54,8 @@ export class KnobControlElement extends HTMLElement {
         };
     }
 
-    get aParam() {
-        return this.aparam;
+    get aParamControl() {
+        return this.aparam!;
     }
     // SVG
     svg = document.createElementNS(SVGXMLNS, 'svg');

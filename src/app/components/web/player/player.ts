@@ -1,11 +1,17 @@
-import { audioManager } from "@/app/services/audio/audiotrackmanager";
-import { Status } from "@/app/state/trackdetails/trackdetails";
-import { Orientation } from "../visual/volume_level";
+import { audioManager } from '@/app/services/audio/audiotrackmanager';
+import { Status } from '@/app/state/trackdetails/trackdetails';
+import { Orientation } from '../visual/volume_level';
+import { SingletonStore } from '@/app/services/singlestore';
+import { WindowID, WindowStore, createIdentifier } from '@/app/states/window_store';
+import { VerticalAlignment } from '@/app/state/windowstore';
+import { getRandomWindowId } from '@/app/services/random';
 
 export class PlayerElement extends HTMLElement {
     masterVolume = 1;
     playerRunButton = document.createElement('span');
+    mixerWrapper = document.createElement('div');
     stat: Status = Status.Pause;
+    windowStore = SingletonStore.getInstance(WindowStore);
 
     constructor() {
         super();
@@ -31,9 +37,24 @@ export class PlayerElement extends HTMLElement {
         return knob;
     }
 
-    // Currently, let player.tsx handle it.
-    onPauseOrPlay() {
-        // dispatch
+    openMixer() {
+        const mixer = document.createElement('c-mixer');
+        mixer.mixerCount = audioManager.totalMixers;
+    
+        this.windowStore.addWindow({
+            header: 'Mixer',
+            uniqueIdentifier: createIdentifier(audioManager.mixer.viewId),
+            x: 10,
+            y: 10,
+            overflow: true,
+            verticalAlignment: VerticalAlignment.Bottom,
+            view: mixer,
+            visible: true,
+            windowSymbol: Symbol() as WindowID,
+            w: 1200,
+            h: 700,
+            windowId: getRandomWindowId()
+        });
     }
 
     connectedCallback() {
@@ -56,7 +77,7 @@ export class PlayerElement extends HTMLElement {
 
         this.playerRunButton.classList.add('ml-2', 'pause', 'play', 'bg-secondary');
         this.playerRunButton.classList.add('rounded-md', 'cursor-pointer');
-        this.playerRunButton.addEventListener('click', this.onPauseOrPlay.bind(this));
+        // this.playerRunButton.addEventListener('click', this.onPauseOrPlay.bind(this));
         this.createPauseOrPlay();
 
         this.appendChild(this.playerRunButton);
@@ -68,7 +89,7 @@ export class PlayerElement extends HTMLElement {
 
         this.appendChild(volumeWrapper);
 
-        const mixerWrapper = document.createElement('div');
+        const mixerWrapper = this.mixerWrapper;
         mixerWrapper.classList.add('views', 'flex', 'ml-4');
         const button = document.createElement('button');
         button.classList.add('border', 'border-solid', 'border-slate-600', 'rounded-sm');
@@ -79,6 +100,7 @@ export class PlayerElement extends HTMLElement {
         mixerIcon.s = 'rgb(100 116 139)';
         button.appendChild(mixerIcon);
         mixerWrapper.appendChild(button);
+        mixerWrapper.onclick = this.openMixer.bind(this);
         
         this.appendChild(mixerWrapper);
     }

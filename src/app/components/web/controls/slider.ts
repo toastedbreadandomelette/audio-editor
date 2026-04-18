@@ -15,8 +15,10 @@ export class SliderControlElement extends HTMLElement {
 
     set aParamControl(aParam: AudioParam) {
         this.aparam = aParam;
+
+        // Min and max values from aParam are out of control.
         this.mapper = (number: number) => {
-            return this.aparam!.minValue + (this.aparam!.maxValue - this.aparam!.minValue) * number;
+            return number;
         }
     }
 

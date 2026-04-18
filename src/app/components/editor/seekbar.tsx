@@ -2,12 +2,13 @@ import React from 'react';
 import {SVGXMLNS} from '@/app/utils';
 import {audioManager} from '@/app/services/audio/audiotrackmanager';
 import {useSelector} from 'react-redux';
-import {RootState} from '@/app/state/store';
 import {ModeType} from './toolkit';
 import {SEC_TO_MICROSEC} from '@/app/state/trackdetails/trackdetails';
 import {REGION_SELECT_TIMELIMIT_MICROSEC} from '@/app/services/audio/clock';
 import { SeekerElement } from '../web/editor/seeker/seeker';
 import { SeekbarElement } from '../web/editor/seeker/seekbar';
+import { SingletonStore } from '@/app/services/singlestore';
+import { ScheduledTracks } from '@/app/states/track_details';
 
 /**
  * @description Timeframe selected by the user.
@@ -65,12 +66,9 @@ const TIME_LABEL_DISTANCE_THRESHOLD = 50;
 
 export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
   // Redux States
-  const tracks = useSelector((state: RootState) => (
-    state.trackDetailsReducer.trackDetails
-  ));
-  const status = useSelector((state: RootState) => (
-    state.trackDetailsReducer.status
-  ));
+  const scheduledTrack = SingletonStore.getInstance(ScheduledTracks);
+  const tracks = scheduledTrack.trackDetails;
+  const status = scheduledTrack.status;
   // Component states
   const [isUserSelecting, setIsUserSelecting] = React.useState(false);
   const [startRegionSelection, setStartRegionSelection] = React.useState(0);
@@ -94,10 +92,6 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
       audioManager.rescheduleAllTracks(tracks);
       setLeft(offsetX);
     }
-  }
-
-  function onLoopEnd() {
-    audioManager.useManager().rescheduleAllTracks(tracks);
   }
 
   function handleMouseDown(event: React.MouseEvent<HTMLDivElement>) {
@@ -163,34 +157,6 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
     setIsUserSelecting(false);
   }
 
-  // This might take some time.
-  // Will look for alternatives later.
-  // const timeData = Array.from(
-  //   {length: Math.floor(props.totalLines / labelMultiplier)},
-  //   (_, index: number) => {
-  //     const time = (timeUnit * labelMultiplier * (index + 1));
-  //     const currMinute = Math.floor(time / 60);
-  //     const currSecond = Math.floor(time) % 60;
-
-  //     return (
-  //       <text
-  //         key={index}
-  //         className="select-none"
-  //         fill="#ccc"
-  //         strokeWidth={1}
-  //         textAnchor="middle"
-  //         dominantBaseline="middle"
-  //         fontSize={16}
-  //         dy={25}
-  //         dx={lineDist * labelMultiplier * (index + 1)}
-  //       >
-  //         {(currMinute < 10 ? "0" : "") + currMinute}:
-  //         {(currSecond < 10 ? "0" : "") + currSecond}
-  //       </text>
-  //     );
-  //   },
-  // );
-
   const startSecs = Math.min(startRegionSelection, endRegionSelection);
   const endSecs = Math.max(startRegionSelection, endRegionSelection);
   const startRegion = (startSecs / timeUnit) * lineDist;
@@ -205,6 +171,11 @@ export function Seekbar(props: React.PropsWithoutRef<SeekbarProps>) {
         lineDistance={lineDist}
       ></c-seeker>
       <c-seekbar
+        onClick={seekToPoint}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseRelease}
+        onMouseLeave={handleMouseRelease}
         h={30}
         lineDistance={props.lineDist}
         totalLines={props.totalLines}

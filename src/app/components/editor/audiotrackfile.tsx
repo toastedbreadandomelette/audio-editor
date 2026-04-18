@@ -18,7 +18,6 @@ import {
 } from '@/app/state/trackdetails/trackdetails';
 
 import {css} from '@/app/services/utils';
-import {Waveform} from '@/assets/wave';
 import {
   ChangeDetails,
   changeHistory,
@@ -137,7 +136,7 @@ export function AudioTrackFile(
       style={{background: file.colorAnnotation}}
     >
       <div className="min-w-8 ml-2">
-        <Waveform color="#ccc" w={40} h={40} vb={"0 0 21 21"} />
+        <wave-icon s="#ccc" w={40} h={40} vb={"0 0 21 21"} />
       </div>
       <div className={css(
         "w-full font-xl ml-2 text-nowrap text-lg overflow-hidden overflow-ellipsis",

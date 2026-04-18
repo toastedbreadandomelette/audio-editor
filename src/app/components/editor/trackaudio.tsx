@@ -1,7 +1,6 @@
 import React from 'react';
 import { audioManager } from '@/app/services/audio/audiotrackmanager';
 import { addIntoAudioBank, AudioDetails } from '@/app/state/audiostate';
-import { Waveform } from '@/assets/wave';
 import { Canvas } from '../shared/customcanvas';
 import { css } from '@/app/services/utils';
 import { ContextMenuContext } from '@/app/providers/contextmenu';
@@ -275,7 +274,7 @@ export function TrackAudio(props: React.PropsWithoutRef<TrackAudioProps>) {
           style={{left: (divRef.current?.scrollLeft ?? 0) + 'px'}}
         >
           <span onClick={contextMenu} className="wave-icon cursor-pointer">
-            <Waveform color="#fff" w={22} h={22} vb="0 0 22 22" />
+            <wave-icon s="#fff" w={22} h={22} vb="0 0 22 22" />
           </span>
           {track.audioName}
         </span>

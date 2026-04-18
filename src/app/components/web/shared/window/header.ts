@@ -5,8 +5,20 @@ export class WindowHeaderElement extends HTMLElement {
     exitIcon = document.createElement('div');
     windowName = '';
 
-    onExit: (() => void) | null = null;
+    _onExit: (() => void) = () => {};
     onMinimize: (() => void) | null = null;
+
+    set onExit(exit: () => void) {
+        this._onExit = exit;
+        this.exitIcon.onclick = (e) => {
+            e.stopPropagation();
+            exit();
+        }
+    }
+
+    get onExit() {
+        return this._onExit;
+    }
 
     set headerName(title: string) {
         this.windowName = title;
@@ -68,7 +80,8 @@ declare global {
             interface IntrinsicElements {
                 'window-header': React.HTMLAttributes<HTMLElement> & 
                 React.RefAttributes<WindowHeaderElement> & {
-                    headerName: string
+                    headerName: string;
+                    onExit: () => void
                 }
             }
         }

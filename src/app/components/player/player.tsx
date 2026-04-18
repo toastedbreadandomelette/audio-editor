@@ -8,6 +8,9 @@ import { addIntoAudioBank } from '@/app/state/audiostate';
 import { getRandomWindowId, randomColor } from '@/app/services/random';
 import { addWindowToAction, VerticalAlignment } from '@/app/state/windowstore';
 import { Orientation } from '../web/visual/volume_level';
+import { WindowID, WindowStore } from '@/app/states/window_store';
+import { SingletonStore } from '@/app/services/singlestore';
+import { createIdentifier } from '../../states/window_store';
 
 export enum TimeframeMode {
   Time,
@@ -25,6 +28,7 @@ export function Player() {
     state.trackDetailsReducer.timeframeMode
   ));
   // States
+  const windowStore = SingletonStore.getInstance(WindowStore);
   const [masterVol, setMasterVol] = React.useState(1);
   const dispatch = useDispatch();
 
@@ -38,24 +42,41 @@ export function Player() {
   }
 
   function openMixer() {
-    addWindowToAction(
-      dispatch,
-      {
-        header: 'Mixer',
-        props: {},
-        propsUniqueIdentifier: audioManager.mixer.viewId,
-        x: 10,
-        y: 10,
-        overflow: true,
-        verticalAlignment: VerticalAlignment.Bottom,
-        view: () => <><c-mixer mixerCount={audioManager.totalMixers} /></>,
-        visible: true,
-        windowSymbol: Symbol(),
-        w: 1200,
-        h: 700,
-        windowId: getRandomWindowId()
-      }
-    )
+    const mixer = document.createElement('c-mixer');
+    mixer.mixerCount = audioManager.totalMixers;
+
+    windowStore.addWindow({
+      header: 'Mixer',
+      uniqueIdentifier: createIdentifier(audioManager.mixer.viewId),
+      x: 10,
+      y: 10,
+      overflow: true,
+      verticalAlignment: VerticalAlignment.Bottom,
+      view: mixer,
+      visible: true,
+      windowSymbol: Symbol() as WindowID,
+      w: 1200,
+      h: 700,
+      windowId: getRandomWindowId()
+    });
+    // addWindowToAction(
+    //   dispatch,
+    //   {
+    //     header: 'Mixer',
+    //     props: {},
+    //     propsUniqueIdentifier: audioManager.mixer.viewId,
+    //     x: 10,
+    //     y: 10,
+    //     overflow: true,
+    //     verticalAlignment: VerticalAlignment.Bottom,
+    //     view: () => <><c-mixer mixerCount={audioManager.totalMixers} /></>,
+    //     visible: true,
+    //     windowSymbol: Symbol(),
+    //     w: 1200,
+    //     h: 700,
+    //     windowId: getRandomWindowId()
+    //   }
+    // )
   }
 
   /**

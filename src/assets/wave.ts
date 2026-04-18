@@ -1,10 +1,19 @@
 import { SVGXMLNS } from "@/app/utils";
 
-export class PlayIconElement extends HTMLElement {
+export class WaveIconElement extends HTMLElement {
     width = 0;
     height = 0;
+    viewBox = '';
     stroke = '#000';
     fill = '#FFF';
+
+    set vb(viewBox: string) {
+        this.viewBox = viewBox;
+    }
+
+    get vb() {
+        return this.viewBox;
+    }
 
     set w(width: number) {
         this.width = width;
@@ -43,13 +52,16 @@ export class PlayIconElement extends HTMLElement {
     }
 
     connectedCallback() {
+        this.classList.add('inline');
         this.innerHTML = `
-            <svg xmlns=${SVGXMLNS} width=${this.w} height=${this.h} viewBox="0 0 40 40">
-                <path 
-                fill=${this.f}
-                stroke=${this.s} 
-                d="M 2 4 C 3.5 3.5, 3.5 3.5, 4 4 L 36 18 C 38 19, 38 21, 36 22 L 4 36 C 2.5 36.5, 2.5 36.5, 2 36 L 2 4"
-                ></path>
+            <svg xmlns="${SVGXMLNS}" style="display: inline" width="${this.width}" height="${this.height}" viewBox="${this.vb}">
+                <g fill="none" fillRule="evenodd" stroke="${this.stroke}" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m6.5 8.5v4"/>
+                <path d="m8.5 6.5v9"/>
+                <path d="m10.5 9.5v2"/>
+                <path d="m12.5 7.5v6.814"/>
+                <path d="m14.5 4.5v12"/>
+                </g>
             </svg>
         `;
     }
@@ -57,17 +69,17 @@ export class PlayIconElement extends HTMLElement {
 
 declare global {
     interface HTMLElementTagNameMap {
-        'play-icon': PlayIconElement
+        'wave-icon': WaveIconElement
     }
     namespace React {
         namespace JSX {
             interface IntrinsicElements {
-                'play-icon': React.HTMLAttributes<HTMLElement> & 
-                React.RefAttributes<PlayIconElement> & {
+                'wave-icon': React.HTMLAttributes<HTMLElement> & 
+                React.RefAttributes<WaveIconElement> & {
                     w: number;
                     h: number;
                     s: string;
-                    f: string;
+                    vb: string;
                 };
             }
         }

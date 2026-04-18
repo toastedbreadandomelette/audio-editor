@@ -1,3 +1,10 @@
+import {
+    WindowView,
+    VerticalAlignment,
+    HorizontalAlignment,
+    WindowID
+} from '@/app/states/window_store';
+
 // TODO: creating custom events
 export class WindowElement extends HTMLElement {
     px = 0;
@@ -5,13 +12,60 @@ export class WindowElement extends HTMLElement {
     w = 0;
     h = 0;
     z = 0;
+    horizontal: HorizontalAlignment = HorizontalAlignment.Left;
+    vertical: VerticalAlignment = VerticalAlignment.Top;
+    overX: boolean = false;
     _id = -1;
+    sym: WindowID = Symbol() as WindowID;
+    window: WindowView | null = null;
+
+    _onClose: (window: WindowView | null) => void = () => {};
 
     windowTitle = '';
 
     slotElement = document.createElement('slot');
     header = document.createElement('window-header');
 
+    set onClose(onClose: (window: WindowView | null) => void) {
+        this._onClose = onClose;
+    }
+
+    get onClose() {
+        return this._onClose;
+    }
+
+    get winSym() {
+        return this.sym;
+    }
+
+    set winSym(sym: WindowID) {
+        this.sym = sym;
+    }
+
+    get overflowX() {
+        return this.overX;
+    }
+
+    set overflowX(overX: boolean) {
+        this.overX = overX;
+    }
+    
+    get hAlign() {
+        return this.horizontal;
+    }
+
+    set hAlign(horizontal: HorizontalAlignment) {
+        this.horizontal = horizontal;
+    }
+
+    get vAlign() {
+        return this.vertical;
+    }
+
+    set vAlign(vertical: VerticalAlignment) {
+        this.vertical = vertical;
+    }
+    
     get headerName() {
         return this.windowTitle;
     }
@@ -78,8 +132,23 @@ export class WindowElement extends HTMLElement {
         super();
     }
 
+    removeSelf() {
+        this.window?.view.remove();
+        this.remove();
+    }
+
+    setInner(element: HTMLElement) {
+        if (!this.slotElement.children.length) {
+            this.slotElement.appendChild(element);
+            return;
+        }
+        if (this.slotElement.children[0] !== element) {
+            this.slotElement.children[0] = element;
+        }
+    }
+
     connectedCallback() {
-        const shadow = this.attachShadow({mode: 'closed'});
+        // this.attachShadow({mode: 'open'});
         this.classList.add('absolute', 'border-2', 'flex', 'flex-col', 'border-solid');
         this.classList.add('border-slate-800', 'rounded-sm', 'z-[100]', 'transition-shadow');
         this.classList.add('ease-in-out', 'shadow-black');
@@ -88,15 +157,23 @@ export class WindowElement extends HTMLElement {
         this.setPosition();
         this.setZIndex();
         this.setAttribute('data-windowid', this._id.toString());
-        shadow.appendChild(this.header);
+        this.appendChild(this.header);
         
         // TODO: Resizing; change pointer types.
         // const slotWrapper = document.createElement('div');
         this.slotElement.classList.add('content', 'flex', 'bg-primary', 'w-full');
         this.slotElement.classList.add('h-full', 'rounded-es-sm', 'rounded-ee-sm');
-        this.slotElement.classList.add('overflow-scroll');
-        // this.slotElement.appendChild(this.slotElement);
-        shadow.appendChild(this.slotElement);
+        
+        if (this.overX) {
+            this.slotElement.classList.add('overflow-x-scroll');
+        }
+
+        this.header.onExit = () => {
+            this.onClose(this.window);
+            this.removeSelf();
+        }
+
+        this.appendChild(this.slotElement);
     }
 
     setDimensions() {
@@ -134,6 +211,10 @@ declare global {
                     left: number;
                     top: number;
                     zIndex: number;
+                    hAlign: HorizontalAlignment;
+                    vAlign: VerticalAlignment;
+                    overflowX: boolean;
+                    onClose: (window: WindowView | null) => void
                 }
             }
         }

@@ -5,6 +5,8 @@ import {TrackAudio} from './trackaudio';
 import {TimeSectionSelection} from './seekbar';
 import {SEC_TO_MICROSEC} from '@/app/state//trackdetails/trackdetails';
 import {TrackAutomation} from './trackautomation';
+import { SingletonStore } from '@/app/services/singlestore';
+import { ScheduledTracks } from '@/app/states/track_details';
 
 interface TrackProps {
   id: number
@@ -16,15 +18,8 @@ interface TrackProps {
 }
 
 export function Tracks(props: React.PropsWithoutRef<TrackProps>) {
-  const trackData = useSelector((state: RootState) => (
-    state.trackDetailsReducer.trackDetails[props.id]
-  ));
-  const trackAutomation = useSelector((state: RootState) => (
-    state.trackDetailsReducer.trackAutomation[props.id]
-  ));
-  const mode = useSelector((state: RootState) => (
-    state.trackDetailsReducer.timeframeMode
-  ));
+  const scheduledTrack = SingletonStore.getInstance(ScheduledTracks);
+  const trackData = scheduledTrack.trackDetails[props.id];
 
   const lineDist = props.lineDist;
   const timeUnit = props.timeUnitPerLineDistanceSecs;
@@ -47,6 +42,7 @@ export function Tracks(props: React.PropsWithoutRef<TrackProps>) {
           //   trackSource={track}
           //   key={track.trackDetail.id}
           //   dataId={index}
+          //   trackId={props.id}
           //   height={props.h}
           //   lineDistance={lineDist}
           // ></audio-track>
@@ -61,7 +57,7 @@ export function Tracks(props: React.PropsWithoutRef<TrackProps>) {
           />
         ))
       }
-      {
+      {/* {
         trackAutomation.map((automation, index: number) => (
           <TrackAutomation
             index={index}
@@ -73,7 +69,7 @@ export function Tracks(props: React.PropsWithoutRef<TrackProps>) {
             height={props.h}
           />
         ))
-      }
+      } */}
       <c-marker
         width={props.w}
         height={props.h} 

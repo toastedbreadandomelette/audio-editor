@@ -30,6 +30,11 @@ export class AudioStore {
     return panner.pan.value;
   }
 
+  getPannerParamForAudio(audioId: symbol) {
+    const {panner} = this.audioBank[audioId];
+    return panner;
+  }
+
   setGainForAudio(audioId: symbol, value: number) {
     const {gain} = this.audioBank[audioId];
     gain.gain.value = value;

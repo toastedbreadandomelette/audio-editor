@@ -3,21 +3,21 @@ import { audioManager } from "@/app/services/audio/audiotrackmanager";
 import { RootState } from "@/app/state/store";
 import { SEC_TO_MICROSEC, Status } from "@/app/state/trackdetails/trackdetails";
 import { useSelector } from "react-redux";
+import { SingletonStore } from "@/app/services/singlestore";
+import { ScheduledTracks } from "@/app/states/track_details";
 
 // TODO: Add unitTimePerLineDistance
 export function WaveformSeeker(props: React.PropsWithoutRef<{
   trackNumber: number
-  audioId: number
+  audioId: number 
   h: number
   lineDist: number
   seekOffset?: number
 }>) {
   const seekbarRef = React.useRef<HTMLDivElement>(null);
   const {trackNumber, audioId, lineDist, h} = props;
-
-  const track = useSelector((state: RootState) => (
-    state.trackDetailsReducer.trackDetails[trackNumber][audioId]
-  ));
+  const scheduledTrack = SingletonStore.getInstance(ScheduledTracks);
+  const track = scheduledTrack.trackDetails[trackNumber][audioId];
   const status = useSelector((store: RootState) => (
     store.trackDetailsReducer.status
   ));

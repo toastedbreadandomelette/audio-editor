@@ -9,7 +9,6 @@ import { selectAudio } from '@/app/state/selectedaudiostate';
 import { audioManager } from '@/app/services/audio/audiotrackmanager';
 import { Player } from '../player/player';
 import { AudioWaveformEditor } from '../waveform/waveform';
-import { WindowManager } from '../shared/windowmanager';
 import { ModeType, Toolkit } from './toolkit';
 import { RegionSelect, RegionSelection } from './regionselect';
 import { AudioTrackManipulationMode } from './trackaudio';
@@ -24,9 +23,6 @@ import {
 } from '../shared/resizablepanels';
 import {
   addWindowToAction,
-  batchRemoveWindowWithUniqueIdentifier,
-  removeWindowWithUniqueIdentifier,
-  setWindowPosition,
 } from '@/app/state/windowstore';
 import {
   createAudioData,
@@ -37,24 +33,12 @@ import {
   traverseParentUntilOneCondition
 } from '@/app/services/utils';
 import {
-  addAudioToTrack,
   AudioTrackDetails,
-  deleteAudioFromTrack,
-  selectTracksWithinSpecifiedRegion,
-  setOffsetDetailsToAudioTrack,
-  setOffsetDetailsToMultipleAudioTrack,
-  sliceAudioTracks,
   Status,
   togglePlay,
-  rollbackChanges,
-  cloneAudioTrack,
-  cloneMultipleAudioTrack,
-  deleteMultipleAudioTrack,
   ScheduledInformation,
   SEC_TO_MICROSEC,
   deselectAllTracks,
-  selectAllTracks,
-  selectTracksWithinSelectedSeekbarSection,
   TrackInformation
 } from '@/app/state/trackdetails/trackdetails';
 import {
@@ -71,6 +55,11 @@ import { HistoryAction } from '@/app/state/trackdetails/tracksnapshots';
 import { SeekbarElement } from '../web/editor/seeker/seekbar';
 import { SeekerElement } from '../web/editor/seeker/seeker';
 import { TrackColumnElement } from '../web/editor/track_column';
+import { SingletonStore } from '@/app/services/singlestore';
+import { ScheduledTracks } from '../../states/track_details';
+import { WindowID, WindowStore } from '@/app/states/window_store';
+import { createIdentifier } from '../../states/window_store';
+import { WindowManager } from '../shared/windowmanager';
 
 /**
  * @description Movable Type, for handling all the move events.
@@ -110,14 +99,17 @@ export function Editor() {
   const [windowManipulationMode, setWindowManipulationMode] = React.useState(
     WindowManipulationMode.None
   );
-
   const [height, setHeight] = React.useState(90);
+  const [changed, setChanged] = React.useState(false);
   const [dragged, setDragged] = React.useState(false);
   const [lineDist, setLineDist] = React.useState(100);
   const [currentMode, setCurrentMode] = React.useState(ModeType.DefaultSelector);
   const [trackForEdit, selectTrackForEdit] = React.useState<AudioTrackDetails | null>(null);
   const [selectedRegion, setSelectedRegion] = React.useState<TimeSectionSelection | null>(null);
 
+  const scheduledTrack = SingletonStore.getInstance(ScheduledTracks);
+  const windowStore = SingletonStore.getInstance(WindowStore);
+  const trackDetails = scheduledTrack.trackDetails;
   // Redux states
   const store = useSelector((state: RootState) => (
     state.audioReducer.audioBankList
@@ -125,21 +117,12 @@ export function Editor() {
   const currentTrack = useSelector((state: RootState) => (
     state.selectedAudioSliceReducer.value
   ));
-  const trackDetails = useSelector((state: RootState) => (
-    state.trackDetailsReducer.trackDetails
-  ));
-  const trackTimeDurationMicros = useSelector((state: RootState) => (
-    state.trackDetailsReducer.maxTimeMicros
-  ));
   const status = useSelector((state: RootState) => (
     state.trackDetailsReducer.status
   ));
-  const windows = useSelector((state: RootState) => (
-    state.windowStoreReducer.contents
-  ));
-  const ordering = useSelector((state: RootState) => (
-    state.windowStoreReducer.ordering
-  ));
+  const windows = windowStore.windowDetails;
+  const ordering = windowStore.ordering;
+
   const dispatch = useDispatch();
 
   // Refs
@@ -148,10 +131,6 @@ export function Editor() {
   const seekerRef = React.useRef<SeekerElement>(null);
   const scrollPageRef = React.useRef<HTMLDivElement>(null);
   const verticalScrollPageRef = React.useRef<HTMLDivElement>(null);
-
-  const widthToTime = (width: number) => (
-    round((width / lineDist) * timeUnitPerLineMicros)
-  );
 
   // Context
   const {
@@ -165,19 +144,14 @@ export function Editor() {
   } = React.useContext(PromptMenuContext);
 
   // Other variables
+  const trackTimeDurationMicros = scheduledTrack.maxTimeMicros; 
   const totalTracks = trackDetails.length;
   const timeUnitPerLineDistInSeconds = 5;
   const timeUnitPerLineMicros = timeUnitPerLineDistInSeconds * SEC_TO_MICROSEC;
 
-  const width = React.useMemo(
-    () => (trackTimeDurationMicros / timeUnitPerLineMicros) * lineDist,
-    [trackTimeDurationMicros, timeUnitPerLineMicros, lineDist]
-  );
+  const width = (trackTimeDurationMicros / timeUnitPerLineMicros) * lineDist;
 
-  const totalLines = React.useMemo(
-    () => Math.floor(width / lineDist),
-    [width, lineDist]
-  );
+  const totalLines = Math.floor(width / lineDist);
 
   const isChrome = React.useMemo(
     () => navigator.userAgent.indexOf('Chrome') > -1,
@@ -212,13 +186,14 @@ export function Editor() {
       ((scrollLeft + clientWidth) * timeUnit) / lineDist
     );
 
-    dispatch(setOffsetDetailsToAudioTrack({
+    scheduledTrack.setOffsetDetailsToAudioTrack({
       trackNumber: trackIntIndex,
       audioIndex: audioIntIndex,
       offsetInMicros,
       startOffsetInMicros,
       endOffsetInMicros
-    }));
+    });
+    setChanged(!changed);
 
     return {
       offsetInMicros,
@@ -261,23 +236,22 @@ export function Editor() {
       }
 
       dispatch(addIntoAudioBank(data));
-      dispatch(addAudioToTrack({
-        trackNumber,
-        track: {
-          ...data,
-          trackDetail: {
-            trackNumber,
-            offsetInMicros: timeOffset,
-            scheduledKey: Symbol(),
-            id: -1,
-            startOffsetInMicros: 0,
-            playbackRate: 1,
-            endOffsetInMicros: data.duration * SEC_TO_MICROSEC,
-            selected: false
-          }
+
+      scheduledTrack.addAudioToTrack({
+        ...data,
+        trackDetail: {
+          trackNumber,
+          offsetInMicros: timeOffset,
+          scheduledKey: Symbol(),
+          id: -1,
+          startOffsetInMicros: 0,
+          playbackRate: 1,
+          endOffsetInMicros: data.duration * SEC_TO_MICROSEC,
+          selected: false
         }
-      }));
-    })
+      }, trackNumber);
+      setChanged(!changed);
+    });
   }
 
   // TODO: Optimize this.
@@ -336,25 +310,40 @@ export function Editor() {
       setTimeout(() => selectTrackForEdit(null), 300);
     } else {
       addWindowToAction(
-        dispatch, 
-        {
-          header: <><b>Track</b>: {trackForEdit.audioName}</>,
-          props: {
-            trackNumber,
-            audioId: audioIndex,
-            w: 780,
-            timePerUnitLineDistanceSecs: timeUnitPerLineDistInSeconds,
-            h: 100,
-          },
-          windowSymbol: Symbol(),
-          view: AudioWaveformEditor,
-          x: scrollPageRef.current?.scrollLeft ?? 0,
-          y: scrollPageRef.current?.scrollTop ?? 0,
-          visible: true,
-          propsUniqueIdentifier: trackForEdit.trackDetail.scheduledKey,
-          windowId: getRandomWindowId()
-        }
-      );
+        dispatch, {
+        header: `Track: ${trackForEdit.audioName}`,
+        props: {
+          trackNumber,
+          audioId: audioIndex,
+          w: 780,
+          timePerUnitLineDistanceSecs: timeUnitPerLineDistInSeconds,
+          h: 100,
+        },
+        windowSymbol: Symbol() as WindowID,
+        view: AudioWaveformEditor,
+        x: scrollPageRef.current?.scrollLeft ?? 200,
+        y: scrollPageRef.current?.scrollTop ?? 200,
+        visible: true,
+        propsUniqueIdentifier: createIdentifier(trackForEdit.trackDetail.scheduledKey),
+        windowId: getRandomWindowId()
+      });
+      // windowStore.addWindow({
+      //   header: `Track: ${trackForEdit.audioName}`,
+      //   // props: {
+      //   //   trackNumber,
+      //   //   audioId: audioIndex,
+      //   //   w: 780,
+      //   //   timePerUnitLineDistanceSecs: timeUnitPerLineDistInSeconds,
+      //   //   h: 100,
+      //   // },
+      //   windowSymbol: Symbol() as WindowID,
+      //   view: document.createElement('div'),
+      //   x: scrollPageRef.current?.scrollLeft ?? 0,
+      //   y: scrollPageRef.current?.scrollTop ?? 0,
+      //   visible: true,
+      //   uniqueIdentifier: createIdentifier(trackForEdit.trackDetail.scheduledKey),
+      //   windowId: getRandomWindowId()
+      // });
 
       selectTrackForEdit(null);
     }
@@ -364,11 +353,14 @@ export function Editor() {
       if (event.shiftKey) {
         const allSelectedTracks = 
           audioManager.getMultiSelectedTrackInformation();
-        dispatch(cloneMultipleAudioTrack(allSelectedTracks));
+        scheduledTrack.cloneMultipleAudioTrack(
+          allSelectedTracks.trackNumbers,
+          allSelectedTracks.audioIndexes
+        );
       }
     } else {
       if (event.shiftKey) {
-        dispatch(cloneAudioTrack({ trackNumber, audioIndex }));
+        scheduledTrack.cloneAudioTrack(trackNumber, audioIndex);
       }
 
       const left = element.offsetLeft;
@@ -385,6 +377,7 @@ export function Editor() {
       dispatch(selectAudio(trackDetails[trackNumber][audioIndex]));
     }
 
+    setChanged(!changed);
     setMovableEntity(element);
     setMovableType(MovableType.ScheduledTrack);
   }
@@ -447,16 +440,10 @@ export function Editor() {
   }
 
   function unsetDragMode(event: React.MouseEvent<HTMLDivElement>) {
-    switch (movableType) {
-      case MovableType.ScheduledTrack: {
-        unsetDrag(event);
-        break;
-      }
-
-      case MovableType.Window: {
-        unsetWindowDrag(event);
-        break;
-      }
+    if (movableType === MovableType.ScheduledTrack) {
+      unsetDrag(event);
+    } else if (windowStore.selectedWindowInfo.selected) {
+      unsetWindowDrag(event);
     }
   }
 
@@ -468,29 +455,29 @@ export function Editor() {
     if (!parentElement) {
       return;
     }
-    setAnchorX(event.nativeEvent.clientX);
-    setAnchorY(event.nativeEvent.clientY);
-    setMovableEntity(parentElement);
-    setMovableType(MovableType.Window);
-    setWindowManipulationMode(WindowManipulationMode.Move);
+    const {clientX, clientY} = event.nativeEvent;
+    windowStore.selectedWindowInfo.x = clientX;
+    windowStore.selectedWindowInfo.y = clientY;
+    windowStore.selectedWindowInfo.selected = true;
+    windowStore.selectedWindowInfo.element = parentElement;
   }
 
   function dragWindow(event: React.MouseEvent<HTMLDivElement, DragEvent>) {
-    const element = movableEntity;
-    if (!element) return;
+    if (!windowStore.selectedWindowInfo.selected) return;
 
     const {clientX, clientY} = event.nativeEvent;
+    const {x, y, element} = windowStore.selectedWindowInfo;
 
-    const diffAnchorX = clientX - anchorX;
-    const diffAnchorY = clientY - anchorY;
-    const windowIdString = element.getAttribute('data-windowid') as string;
+    const diffAnchorX = clientX - x;
+    const diffAnchorY = clientY - y;
+    const windowIdString = element!.getAttribute('data-windowid') as string;
     const orderingIndex = parseInt(windowIdString);
     const windowId = ordering[orderingIndex];
-    const left = windows[windowId].x;
-    const top = windows[windowId].y;
+    const left = windows.get(windowId)!.x;
+    const top = windows.get(windowId)!.y;
 
     Object.assign(
-      element.style,
+      element!.style,
       {
         left: left + diffAnchorX + 'px',
         top: top + diffAnchorY + 'px'
@@ -535,30 +522,26 @@ export function Editor() {
   }
 
   function unsetWindowDrag(event: React.MouseEvent<HTMLElement>) {
-    const element= movableEntity;
-    if (!element) return;
-
     const {clientX, clientY} = event.nativeEvent;
+    const {x, y, element} = windowStore.selectedWindowInfo;
 
-    const diffAnchorX = clientX - anchorX;
-    const diffAnchorY = clientY - anchorY;
+    const diffAnchorX = clientX - x;
+    const diffAnchorY = clientY - y;
 
-    const windowIdString = element.getAttribute('data-windowid') as string;
+    const windowIdString = element!.getAttribute('data-windowid') as string;
     const orderingIndex = parseInt(windowIdString);
     const windowId = ordering[orderingIndex];
-    const left = windows[windowId].x;
-    const top = windows[windowId].y;
+    const left = windows.get(windowId)!.x;
+    const top = windows.get(windowId)!.y;
+    windowStore.selectedWindowInfo.element = null;
+    windowStore.selectedWindowInfo.windowId = null;
+    windowStore.selectedWindowInfo.selected = false;
 
-    dispatch(setWindowPosition({
+    windowStore.setWindowPosition({
       x: left + diffAnchorX,
       y: top + diffAnchorY,
-      windowSymbol: windowId
-    }));
-
-    setMovableEntity(null);
-    setMovableType(MovableType.None);
-    setAnchorX(0);
-    setAnchorY(0);
+      window: windowId as WindowID
+    });
   }
 
   // TODO: Move this to a different file.
@@ -611,13 +594,14 @@ export function Editor() {
         allEndOffsetsInMicros.push(endTimeOffset);
       });
 
-      dispatch(setOffsetDetailsToMultipleAudioTrack({
+      scheduledTrack.setOffsetDetailsToMultipleAudioTrack({
         allTrackNumbers,
         allAudioIndexes,
         allOffsetsInMicros,
         allStartOffsetsInMicros,
         allEndOffsetsInMicros
-      }));
+      });
+      setChanged(!changed);
 
       const movedTrackInfo: AudioTrackDetails[] = [];
 
@@ -696,16 +680,10 @@ export function Editor() {
   }
 
   function dragOrResizeElement(event: React.MouseEvent<HTMLDivElement, DragEvent>) {
-    switch (movableType) {
-      case MovableType.ScheduledTrack: {
-        dragTrack(event);
-        break;
-      }
-
-      case MovableType.Window: {
-        dragWindow(event);
-        break;
-      }
+    if (movableType === MovableType.ScheduledTrack) {
+      dragTrack(event);
+    } else if (windowStore.selectedWindowInfo.selected) {
+      dragWindow(event);
     }
   }
 
@@ -740,14 +718,15 @@ export function Editor() {
     const audioIntIndex = parseInt(audioIndex);
 
     const audioTrack = trackDetails[trackNumber][audioIntIndex];
-    dispatch(
-      removeWindowWithUniqueIdentifier(audioTrack.trackDetail.scheduledKey)
-    );
+    windowStore
+      .removeWindowUniqueIdentifier(createIdentifier(audioTrack.trackDetail.scheduledKey));
+
     audioManager.removeTrackFromScheduledNodes(audioTrack);
-    dispatch(deleteAudioFromTrack({
+    scheduledTrack.deleteAudioFromTrack(
       trackNumber,
-      audioIndex: audioIntIndex
-    }));
+      audioIntIndex
+    );
+    setChanged(!changed);
   }
 
   function addCurrentTrack(
@@ -778,10 +757,11 @@ export function Editor() {
       }
     };
 
-    dispatch(addAudioToTrack({
+    scheduledTrack.addAudioToTrack(
+      newTrack,
       trackNumber,
-      track: newTrack
-    }));
+    );
+    setChanged(!changed);
 
     audioManager
       .useManager()
@@ -812,12 +792,17 @@ export function Editor() {
           audioManager.removeScheduledTracksFromScheduledKeys(
             selectedTrackDetails.scheduledKeys
           );
-          dispatch(deleteMultipleAudioTrack(selectedTrackDetails));
-          dispatch(
+          scheduledTrack.deleteMultipleAudioTrack(
+            selectedTrackDetails.trackNumbers,
+            selectedTrackDetails.audioIndexes
+          );
+          setChanged(!changed);
+          windowStore.
             batchRemoveWindowWithUniqueIdentifier(
-              selectedTrackDetails.scheduledKeys
-            )
-          )
+              selectedTrackDetails.scheduledKeys.map((d) => (
+                createIdentifier(d)
+              ))
+            );
         }
         break;
       }
@@ -832,7 +817,8 @@ export function Editor() {
       case 'A': {
         if (event.ctrlKey) {
           event.preventDefault();
-          dispatch(selectAllTracks());
+          scheduledTrack.selectAllTracks();
+          setChanged(!changed);
         }
 
         break;
@@ -846,10 +832,11 @@ export function Editor() {
           if (trackChanges) {
             switch (trackChanges.workspaceChange) {
               case WorkspaceChange.TrackChanges: {
-                dispatch(rollbackChanges({
-                  updatedChanges: trackChanges.updatedValues,
-                  action: HistoryAction.Redo
-                }));
+                scheduledTrack.rollbackChanges(
+                  trackChanges.updatedValues,
+                  HistoryAction.Redo
+                );
+                setChanged(!changed);
                 break;
               }
 
@@ -864,10 +851,8 @@ export function Editor() {
           if (trackChanges) {
             switch (trackChanges.workspaceChange) {
               case WorkspaceChange.TrackChanges: {
-                dispatch(rollbackChanges({
-                  updatedChanges: trackChanges.updatedValues,
-                  action: HistoryAction.Undo
-                }))
+                scheduledTrack.rollbackChanges(trackChanges.updatedValues, HistoryAction.Undo);
+                setChanged(!changed);
                 break;
               }
 
@@ -938,21 +923,24 @@ export function Editor() {
   }
 
   function sliceIntersectingTracks(sliceInformation: SlicerSelection) {
-    dispatch(sliceAudioTracks(sliceInformation));
+    scheduledTrack.sliceAudioTracks(sliceInformation);
+    setChanged(!changed);
   }
 
   function selectTracksEnveloped(event: RegionSelection) {
-    dispatch(selectTracksWithinSpecifiedRegion(event));
+    scheduledTrack.selectTracksWithinSpecifiedRegion(event);
+    setChanged(!changed);
   }
 
   // TODO: Trigger only if there are selected tracks/automation.
   function onSelectingTime(event: TimeSectionSelection | null) {
     if (event) {
-      dispatch(selectTracksWithinSelectedSeekbarSection(event));
+      scheduledTrack.selectTracksWithinSelectedSeekbarSection(event);
     } else {
-      dispatch(deselectAllTracks());
+      scheduledTrack.deselectAllTracks();
     }
 
+    setChanged(!changed);
     audioManager.selectTimeframe(event);
 
     setSelectedRegion(event);
@@ -1016,9 +1004,10 @@ export function Editor() {
         onMouseUp={unsetDragMode}
         onMouseLeave={unsetDragMode}
         onContextMenu={deleteAudio}
-      >
+      > 
         <div className="player">
           <Player />
+          <window-manager  />
           <WindowManager />
         </div>
         <ResizingGroup className="max-h-[92dvh] max-w-full">
@@ -1049,23 +1038,6 @@ export function Editor() {
                   trackDetails={trackDetails}
                   ref={ref}
                 ></track-column>
-                {/* <div ref={ref} className="track-list custom-list pb-2 relative overflow-hidden h-full max-h-full">
-                  {
-                    Array.from({length: totalTracks}, (_, index: number) => (
-                      <div 
-                        key={index}
-                        className="track-info bg-darker box-border border border-solid border-darker-2 rounded-l-md text-center content-center items-center min-w-44 max-w-44"
-                        style={{height: height + 'px'}}
-                      >
-                        <c-track-info
-                          track={index}
-                          entityCount={trackDetails[index].length}
-                        >
-                        </c-track-info>
-                      </div>
-                    ))
-                  }
-                </div> */}
               </div>
               <div className="track-info rounded-r-md text-center min-w-[0%] max-w-full">
                 <div className="workspace relative bg-primary overflow-hidden h-full">

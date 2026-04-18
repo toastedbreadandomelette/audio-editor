@@ -3,15 +3,15 @@ export enum AnimationState {
   Suspended
 }
 
+type AnimationInfo = {
+  fn: () => void
+  previousTimestamp: number
+  allowedFrameTime?: number
+  currentMode: AnimationState
+}
+
 class AnimationBatcher {
-  handlerStates: {
-    [k: symbol]: {
-      fn: () => void
-      previousTimestamp: number
-      allowedFrameTime?: number
-      currentMode: AnimationState
-    }
-  } = {};
+  handlerStates: Map<symbol, AnimationInfo> = new Map();
   masterHandler: number = 0;
   boundRun = this.run.bind(this)
 
@@ -29,8 +29,7 @@ class AnimationBatcher {
    * @returns void
    */
   private run() {
-    for (const key of Object.getOwnPropertySymbols(this.handlerStates)) {
-      const animationHandle = this.handlerStates[key];
+    for (const [key, animationHandle] of this.handlerStates) {
       const currentTimestamp = performance.now();
 
       if (
@@ -73,11 +72,11 @@ class AnimationBatcher {
   addAnimationHandler(fn: () => void): symbol {
     const animationSymbolHandler = Symbol();
 
-    this.handlerStates[animationSymbolHandler] = {
+    this.handlerStates.set(animationSymbolHandler, {
       fn,
       previousTimestamp: performance.now(),
       currentMode: AnimationState.Running,
-    };
+    });
 
     return animationSymbolHandler;
   }
@@ -88,8 +87,11 @@ class AnimationBatcher {
    * @param frame frame frequency in Hertz.
    */
   setAnimationFrameRate(handlerSymbol: symbol, frame: number) {
-    if (Object.hasOwn(this.handlerStates, handlerSymbol)) {
-      this.handlerStates[handlerSymbol].allowedFrameTime = 1000 / frame;
+    const handler = this.handlerStates.get(handlerSymbol);
+
+    if (handler) {
+      handler.allowedFrameTime = 1000 / frame;
+      this.handlerStates.set(handlerSymbol, handler);
     }
   }
 
@@ -98,9 +100,7 @@ class AnimationBatcher {
    * @param handlerSymbol Unique identifier
    */
   removeAnimationHandler(handlerSymbol: symbol) {
-    if (Object.hasOwn(this.handlerStates, handlerSymbol)) {
-      delete this.handlerStates[handlerSymbol];
-    }
+    this.handlerStates.delete(handlerSymbol);
   }
 
   /**
@@ -109,8 +109,11 @@ class AnimationBatcher {
    * @param handlerSymbol animation handler.
    */
   suspendAnimation(handlerSymbol: symbol) {
-    if (Object.hasOwn(this.handlerStates, handlerSymbol)) {
-      this.handlerStates[handlerSymbol].currentMode = AnimationState.Suspended;
+    const handler = this.handlerStates.get(handlerSymbol);
+
+    if (handler) {
+      handler.currentMode = AnimationState.Suspended;
+      this.handlerStates.set(handlerSymbol, handler);
     }
   }
 
@@ -120,8 +123,11 @@ class AnimationBatcher {
    * @param handlerSymbol animation handler.
    */
   resumeAnimation(handlerSymbol: symbol) {
-    if (Object.hasOwn(this.handlerStates, handlerSymbol)) {
-      this.handlerStates[handlerSymbol].currentMode = AnimationState.Running;
+    const handler = this.handlerStates.get(handlerSymbol);
+
+    if (handler) {
+      handler.currentMode = AnimationState.Running;
+      this.handlerStates.set(handlerSymbol, handler);
     }
   }
 };

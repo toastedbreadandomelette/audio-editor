@@ -4,7 +4,6 @@ import {
   applyChangesToModifiedAudio,
   SEC_TO_MICROSEC
 } from '@/app/state/trackdetails/trackdetails';
-import {Checkbox} from '../checkbox';
 import {transformAudio} from '@/app/services/audiotransform';
 import {useDispatch, useSelector} from 'react-redux';
 import {renderAudioWaveform} from '../editor/trackaudio';
@@ -13,6 +12,8 @@ import {Knob} from '../knob';
 import {RootState} from '@/app/state/store';
 import {WaveformSeekbar} from './waveformseekbar';
 import {AutomatedKnob} from '../shared/automatedknob';
+import { SingletonStore } from '@/app/services/singlestore';
+import { ScheduledTracks } from '@/app/states/track_details';
 
 /**
  * @description Settings for Waveform Editor
@@ -53,9 +54,8 @@ export function AudioWaveformEditor(
   props: React.PropsWithoutRef<WaveformEditorProps>
 ) {
   const {trackNumber, audioId , timePerUnitLineDistanceSecs} = props;
-  const track = useSelector((state: RootState) => (
-    state.trackDetailsReducer.trackDetails[trackNumber][audioId]
-  ));
+  const scheduledTrack = SingletonStore.getInstance(ScheduledTracks);
+  const track = scheduledTrack.trackDetails[trackNumber][audioId];
   const ref = React.useRef<HTMLCanvasElement>(null);
   const divRef = React.useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
@@ -79,6 +79,7 @@ export function AudioWaveformEditor(
   // Audio-related decl
   const audioGainParam = audioManager.getGainParamForAudio(track.audioId);
 
+  console.log('here');
   // Declarations.
   const endTime = track.duration as number;
   const totalLines = endTime / timePerUnitLineDistanceSecs;
@@ -210,16 +211,16 @@ export function AudioWaveformEditor(
           <div className="reversible-settings flex flex-row justify-between content-start p-1 m-1 border border-solid border-secondary w-full">
             <div className="flex flex-col w-full content-start">
               <div className="box w-full py-2">
-                <Checkbox
-                  checked={isPolarityReversed}
+                <checkbox-control
+                  value={isPolarityReversed}
                   disabled={transformationInProgress}
                   onChange={() => transform(AudioTransformation.ReversePolarity)}
                   label="Reverse Polarity"
                 />
               </div>
               <div className="box w-full py-2">
-                <Checkbox
-                  checked={isAudioReversed}
+                <checkbox-control
+                  value={isAudioReversed}
                   disabled={transformationInProgress}
                   onChange={() => transform(AudioTransformation.Reverse)}
                   label="Reverse"
@@ -228,16 +229,16 @@ export function AudioWaveformEditor(
             </div>
             <div className="flex flex-col w-full">
               <div className="box w-full py-2">
-                <Checkbox
-                  checked={isNormalized}
+                <checkbox-control
+                  value={isNormalized}
                   disabled={transformationInProgress}
                   onChange={() => transform(AudioTransformation.Normalization)}
                   label="Normalize"
                 />
               </div>
               <div className="box w-full py-2">
-                <Checkbox
-                  checked={isStereoSwapped}
+                <checkbox-control
+                  value={isStereoSwapped}
                   disabled={transformationInProgress}
                   onChange={() => transform(AudioTransformation.SwapStereo)}
                   label="Swap Stereo"

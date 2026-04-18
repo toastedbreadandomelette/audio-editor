@@ -123,6 +123,10 @@ class AudioTrackManager {
     return this.audioStore.getPannerForAudio(audioId);
   }
 
+  getPannerParamForAudio(audioId: symbol) {
+    return this.audioStore.getPannerParamForAudio(audioId);
+  }
+
   setGainForAudio(audioId: symbol, value: number) {
     this.audioStore.setGainForAudio(audioId, value);
   }

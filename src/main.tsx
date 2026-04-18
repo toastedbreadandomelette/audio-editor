@@ -25,6 +25,9 @@ import { PauseIconElement } from './assets/pause';
 import { PlayIconElement } from './assets/play';
 import { SeekbarElement } from './app/components/web/editor/seeker/seekbar';
 import { TrackColumnElement } from './app/components/web/editor/track_column';
+import { WaveIconElement } from './assets/wave';
+import { WindowManagerElement } from './app/components/web/shared/window/window_manager';
+import { CheckboxElement } from './app/components/web/controls/checkbox';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -39,7 +42,6 @@ createRoot(document.getElementById('root')!).render(
     </ContextMenuProvider>
   </StrictMode>,
 )
-
 
 // TODO: Export custom element defining function later
 function init() {
@@ -62,6 +64,9 @@ function init() {
   customElements.define('play-icon', PlayIconElement);
   customElements.define('c-seekbar', SeekbarElement);
   customElements.define('track-column', TrackColumnElement);
+  customElements.define('wave-icon', WaveIconElement);
+  customElements.define('window-manager', WindowManagerElement);
+  customElements.define('checkbox-control', CheckboxElement);
 }
 
 init();
