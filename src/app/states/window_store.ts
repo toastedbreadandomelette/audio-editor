@@ -1,3 +1,4 @@
+import { IdentifierFactory } from '../models/model';
 import { removeRandomWindowId } from '../services/random';
 import { SingletonStore } from '../services/singlestore';
 
@@ -13,9 +14,9 @@ export enum VerticalAlignment {
     Bottom,
 }
 
-type Identifier = symbol & { __brand: 'ID' };
+type Identifier = IdentifierFactory<'ID'>;
 
-export type WindowID = symbol & {__brand: 'WID'};
+export type WindowID = IdentifierFactory<'WindowID'>;
 
 // Returns an Window Identifier on providing a qualifying identifier
 // to this function. If not, creates one for you.

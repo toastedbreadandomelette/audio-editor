@@ -401,7 +401,7 @@ export function Editor() {
   function decideDragMode(event: React.MouseEvent<HTMLDivElement, DragEvent>) {
     if (event.buttons === 1) {
       const element = event.target as HTMLElement;
-      const fnArray = [isAudioTrack, isTrack, isWindowHeader, isAutomation];
+      const fnArray = [isAudioTrack, isTrack, isAutomation];
 
       const {index, expectedNode} = traverseParentUntilOneCondition(
         element, 
@@ -424,10 +424,6 @@ export function Editor() {
           addCurrentTrack(event, expectedNode);
           break;
 
-        case 2:
-          setupDraggingWindow(event, expectedNode);
-          break;
-
         case 3:
           setTrackDraggingMode(event, expectedNode);
           break;
@@ -442,47 +438,7 @@ export function Editor() {
   function unsetDragMode(event: React.MouseEvent<HTMLDivElement>) {
     if (movableType === MovableType.ScheduledTrack) {
       unsetDrag(event);
-    } else if (windowStore.selectedWindowInfo.selected) {
-      unsetWindowDrag(event);
     }
-  }
-
-  function setupDraggingWindow(
-    event: React.MouseEvent<HTMLElement, DragEvent>,
-    topbarElement: HTMLElement
-  ) {
-    const parentElement = topbarElement.parentElement;
-    if (!parentElement) {
-      return;
-    }
-    const {clientX, clientY} = event.nativeEvent;
-    windowStore.selectedWindowInfo.x = clientX;
-    windowStore.selectedWindowInfo.y = clientY;
-    windowStore.selectedWindowInfo.selected = true;
-    windowStore.selectedWindowInfo.element = parentElement;
-  }
-
-  function dragWindow(event: React.MouseEvent<HTMLDivElement, DragEvent>) {
-    if (!windowStore.selectedWindowInfo.selected) return;
-
-    const {clientX, clientY} = event.nativeEvent;
-    const {x, y, element} = windowStore.selectedWindowInfo;
-
-    const diffAnchorX = clientX - x;
-    const diffAnchorY = clientY - y;
-    const windowIdString = element!.getAttribute('data-windowid') as string;
-    const orderingIndex = parseInt(windowIdString);
-    const windowId = ordering[orderingIndex];
-    const left = windows.get(windowId)!.x;
-    const top = windows.get(windowId)!.y;
-
-    Object.assign(
-      element!.style,
-      {
-        left: left + diffAnchorX + 'px',
-        top: top + diffAnchorY + 'px'
-      }
-    );
   }
 
   const handleSingleTrackMove = useSingleTrackMovement({
@@ -519,29 +475,6 @@ export function Editor() {
         handleSingleTrackMove(diffAnchorX);
       }
     }
-  }
-
-  function unsetWindowDrag(event: React.MouseEvent<HTMLElement>) {
-    const {clientX, clientY} = event.nativeEvent;
-    const {x, y, element} = windowStore.selectedWindowInfo;
-
-    const diffAnchorX = clientX - x;
-    const diffAnchorY = clientY - y;
-
-    const windowIdString = element!.getAttribute('data-windowid') as string;
-    const orderingIndex = parseInt(windowIdString);
-    const windowId = ordering[orderingIndex];
-    const left = windows.get(windowId)!.x;
-    const top = windows.get(windowId)!.y;
-    windowStore.selectedWindowInfo.element = null;
-    windowStore.selectedWindowInfo.windowId = null;
-    windowStore.selectedWindowInfo.selected = false;
-
-    windowStore.setWindowPosition({
-      x: left + diffAnchorX,
-      y: top + diffAnchorY,
-      window: windowId as WindowID
-    });
   }
 
   // TODO: Move this to a different file.
@@ -682,8 +615,6 @@ export function Editor() {
   function dragOrResizeElement(event: React.MouseEvent<HTMLDivElement, DragEvent>) {
     if (movableType === MovableType.ScheduledTrack) {
       dragTrack(event);
-    } else if (windowStore.selectedWindowInfo.selected) {
-      dragWindow(event);
     }
   }
 

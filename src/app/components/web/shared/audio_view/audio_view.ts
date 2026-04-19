@@ -101,6 +101,5 @@ export class AudioViewElement extends HTMLElement {
 
     connectedCallback() {
         this.classList.add('flex', 'flex-col', 'justify-between', 'h-full', 'p-2');
-
     }
 }

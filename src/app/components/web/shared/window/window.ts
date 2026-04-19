@@ -18,15 +18,20 @@ export class WindowElement extends HTMLElement {
     _id = -1;
     sym: WindowID = Symbol() as WindowID;
     window: WindowView | null = null;
+    private dragged = 0;
 
-    _onClose: (window: WindowView | null) => void = () => {};
+    // Event related to window movement or manipulation
+    private _onWindowMoved: (e: MouseEvent, window: WindowElement) => void = () => {};
+    private _onWindowGrabbed: (e: MouseEvent, window: WindowView) => void = () => {};
+    private _onWindowLeave = (e: MouseEvent, window: WindowView, v: WindowElement) => {};
+    private _onClose: (window: WindowView) => void = () => {};
 
     windowTitle = '';
 
     slotElement = document.createElement('slot');
     header = document.createElement('window-header');
 
-    set onClose(onClose: (window: WindowView | null) => void) {
+    set onClose(onClose: (window: WindowView) => void) {
         this._onClose = onClose;
     }
 
@@ -89,7 +94,8 @@ export class WindowElement extends HTMLElement {
 
     set left(px: number) {
         this.px = px;
-        this.style.left = px + 'px';
+        this.window!.x = px;
+        this.style.transform = `translate(${px}px, ${this.py}px)`;
     }
 
     get top() {
@@ -98,7 +104,8 @@ export class WindowElement extends HTMLElement {
 
     set top(py: number) {
         this.py = py;
-        this.style.top = py + 'px';
+        this.window!.y = py;
+        this.style.transform = `translate(${this.px}px, ${py}px)`;
     }
 
     get width() {
@@ -128,6 +135,30 @@ export class WindowElement extends HTMLElement {
         return this.z;
     }
 
+    set onWindowMoved(onWindowMoved: (_: MouseEvent, e: WindowElement) => void) {
+        this._onWindowMoved = onWindowMoved;
+    }
+
+    get onWindowMoved() {
+        return this._onWindowMoved;
+    }
+
+    set onWindowGrabbed(onWindowGrabbed: (_: MouseEvent, e: WindowView) => void) {
+        this._onWindowGrabbed = onWindowGrabbed;
+    }
+
+    get onWindowGrabbed() {
+        return this._onWindowGrabbed;
+    }
+
+    set onWindowLeave(onWindowLeave: (e: MouseEvent, _: WindowView, v: WindowElement) => void) {
+        this._onWindowLeave = onWindowLeave;
+    }
+
+    get onWindowLeave() {
+        return this._onWindowLeave;
+    }
+
     constructor() {
         super();
     }
@@ -147,6 +178,43 @@ export class WindowElement extends HTMLElement {
         }
     }
 
+    private handleCursor(e: MouseEvent) {
+        if (e.buttons !== this.dragged) {
+            this.dragged = e.buttons;
+            this.header.classList.remove('cursor-grab', 'cursor-grabbing');
+            this.header.classList.add(e.buttons === 1 ? 'cursor-grabbing' : 'cursor-grab');
+        }
+    }
+
+    private onHeaderHover(e: MouseEvent) {
+        this.handleCursor(e);
+    }
+
+    private onHeaderMouseDown(e: MouseEvent) {
+        // Should be dispatched to document.body
+        this.handleCursor(e);
+        if (e.buttons === 1) {
+            this._onWindowGrabbed(e, this.window!);
+        }
+    }
+
+    // Let the window_manager take that action:
+    // There might be a case where the movement of a window might
+    // collide with any other window, and we do not want that.
+    private onHeaderMove(e: MouseEvent) {
+        this.handleCursor(e);
+        if (e.buttons === 1) {
+            this._onWindowMoved(e, this);
+        }
+    }
+
+    private onHeaderLeave(e: MouseEvent) {
+        this.handleCursor(e);
+        if (e.buttons === 0) {
+            this._onWindowLeave(e, this.window!, this);
+        }
+    }
+
     connectedCallback() {
         // this.attachShadow({mode: 'open'});
         this.classList.add('absolute', 'border-2', 'flex', 'flex-col', 'border-solid');
@@ -158,6 +226,14 @@ export class WindowElement extends HTMLElement {
         this.setZIndex();
         this.setAttribute('data-windowid', this._id.toString());
         this.appendChild(this.header);
+        this.header.classList.add('cursor-grab');
+
+        // Does this apply to the body itself?
+        this.header.onmouseover = this.onHeaderHover.bind(this);
+        this.header.onmousedown = this.onHeaderMouseDown.bind(this);
+        this.header.onmousemove = this.onHeaderMove.bind(this);
+        this.header.onmouseleave = this.onHeaderLeave.bind(this);
+        this.header.onmouseup = this.onHeaderLeave.bind(this);
         
         // TODO: Resizing; change pointer types.
         // const slotWrapper = document.createElement('div');
@@ -169,7 +245,7 @@ export class WindowElement extends HTMLElement {
         }
 
         this.header.onExit = () => {
-            this.onClose(this.window);
+            this.onClose(this.window!);
             this.removeSelf();
         }
 
@@ -182,8 +258,7 @@ export class WindowElement extends HTMLElement {
     }
 
     setPosition() {
-        this.style.left = this.px + 'px';
-        this.style.top = this.py + 'px';
+        this.style.transform = `translate(${this.px}px, ${this.px}y)`; 
     }
 
     setHeader() {

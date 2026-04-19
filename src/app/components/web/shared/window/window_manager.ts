@@ -12,6 +12,11 @@ const DEFAULT_WIDTH = 1280;
 
 export class WindowManagerElement extends HTMLElement {
     windowStore = SingletonStore.getInstance(WindowStore);
+    movingWindow: WindowView | null = null;
+    anchorX = 0;
+    anchorY = 0;
+    winAnchorX = 0;
+    winAnchorY = 0;
 
     // The attribute should resolve the attributes
     // and update the UI instead of just
@@ -46,6 +51,39 @@ export class WindowManagerElement extends HTMLElement {
         });
     }
 
+    // Use transform instead of left and top
+    setAnchor(e: MouseEvent, win: WindowView) {
+        const {clientX, clientY} = e;
+        this.anchorX = clientX;
+        this.anchorY = clientY;
+        this.winAnchorX = win.x;
+        this.winAnchorY = win.y;
+    }
+
+    moveFromAnchorPosition(e: MouseEvent, win: WindowElement) {
+        const {clientX, clientY} = e;
+        const newPosX = clientX - this.anchorX;
+        const newPosY = clientY - this.anchorY;
+        win.left = this.winAnchorX + newPosX;
+        win.top = this.winAnchorY + newPosY;
+    }
+
+    removeAnchor(e: MouseEvent, win: WindowView, el: WindowElement) {
+        this.movingWindow = null;
+        this.anchorX = 0;
+        this.anchorY = 0;
+        this.winAnchorX = 0;
+        this.winAnchorY = 0;
+        const view = this.windowStore.windowDetails.get(win.windowSymbol);
+
+        if (view) {
+            view.x = el.left;
+            view.y = el.top;
+            win.x = el.left;
+            win.y = el.top;
+        }
+    }
+
     constructor() {
         super();
         this.windowStore.register = this.windowChange.bind(this);
@@ -71,6 +109,10 @@ export class WindowManagerElement extends HTMLElement {
         win.headerName = window.header;
         win.sym = window.windowSymbol;
         win.window = window;
+
+        win.onWindowGrabbed = this.setAnchor.bind(this);
+        win.onWindowLeave = this.removeAnchor.bind(this);
+        win.onWindowMoved = this.moveFromAnchorPosition.bind(this)
 
         return win;
     }
